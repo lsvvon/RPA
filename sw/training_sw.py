@@ -24,7 +24,7 @@ characters = sorted(list(characters))
 batch_size = 16
 
 # image shape 지정
-img_width = 200
+img_width = 250
 img_height = 50
 
 # 이미지가 convolutional blocks에 의해 downsample되는 비율을 2로 설정할 것입니다.
@@ -90,9 +90,6 @@ def encode_single_sample(img_path, label):
     img = tf.transpose(img, perm=[1, 0, 2])
     # 6. 라벨값의 문자를 숫자로 바꿉시다.
     label = char_to_num(tf.strings.unicode_split(label, input_encoding='UTF-8'))
-    # 7. padding을 적용하여 고정된 길이로 맞춥니다.
-    # 7. 패딩을 추가합니다 (텐서를 넘파이 함수로 변환)
-    label = pad_labels(label, max_length)
 
     return {"image": img, "label": label}
 
@@ -116,17 +113,17 @@ validation_dataset = (
 )
 
 #------------------데이터 시각화
-_, ax = plt.subplots(4, 4, figsize=(10, 5))
-for batch in train_dataset.take(1):
-    images = batch["image"]
-    labels = batch["label"]
-    for i in range(16):
-        img = (images[i] * 255).numpy().astype("uint8")
-        label = tf.strings.reduce_join(num_to_char(labels[i])).numpy().decode("utf-8")
-        ax[i // 4, i % 4].imshow(img[:, :, 0], cmap="gray")
-        ax[i // 4, i % 4].set_title(label)
-        ax[i // 4, i % 4].axis("off")
-plt.show()
+# _, ax = plt.subplots(4, 4, figsize=(10, 5))
+# for batch in train_dataset.take(1):
+#     images = batch["image"]
+#     labels = batch["label"]
+#     for i in range(16):
+#         img = (images[i] * 255).numpy().astype("uint8")
+#         label = tf.strings.reduce_join(num_to_char(labels[i])).numpy().decode("utf-8")
+#         ax[i // 4, i % 4].imshow(img[:, :, 0], cmap="gray")
+#         ax[i // 4, i % 4].set_title(label)
+#         ax[i // 4, i % 4].axis("off")
+# plt.show()
 
 
 #------------------모델정의
@@ -141,7 +138,7 @@ class CTCLayer(layers.Layer):
         input_length = tf.cast(tf.shape(y_pred)[1], dtype="int64")
         label_length = tf.cast(tf.shape(y_true)[1], dtype="int64")
 
-        input_length = input_length * tf.ones(shape=(batch_len, 1), dtype="int64")
+        input_length = input_length * tf.ones(shape=(batch_len, 1), dtype="int64")  
         label_length = label_length * tf.ones(shape=(batch_len, 1), dtype="int64")
 
         loss = self.loss_fn(y_true, y_pred, input_length, label_length)
@@ -253,44 +250,44 @@ def decode_batch_predictions(pred):
 
 # ------------------------예측결과 확인하기
 #  validation_dataset의 배치 1개를 시각화
-for batch in validation_dataset.take(1):
-    batch_images = batch["image"]
-    batch_labels = batch["label"]
-
-    preds = prediction_model.predict(batch_images)
-    pred_texts = decode_batch_predictions(preds)
-
-    orig_texts = []
-    for label in batch_labels:
-        label = tf.strings.reduce_join(num_to_char(label)).numpy().decode("utf-8")
-        orig_texts.append(label)
-
-    _, ax = plt.subplots(4, 4, figsize=(15, 5))
-    for i in range(len(pred_texts)):
-        img = (batch_images[i, :, :, 0] * 255).numpy().astype(np.uint8)
-        img = img.T
-        title = f"Prediction: {pred_texts[i]}"
-        ax[i // 4, i % 4].imshow(img, cmap="gray")
-        ax[i // 4, i % 4].set_title(title)
-        ax[i // 4, i % 4].axis("off")
-plt.show()
 # for batch in validation_dataset.take(1):
-#     batch_images = batch['image']
-#     print(batch_images.dtype)
+#     batch_images = batch["image"]
+#     batch_labels = batch["label"]
 
 #     preds = prediction_model.predict(batch_images)
 #     pred_texts = decode_batch_predictions(preds)
 
-#     _, axes = plt.subplots(4, 4, figsize=(15, 5))
+#     orig_texts = []
+#     for label in batch_labels:
+#         label = tf.strings.reduce_join(num_to_char(label)).numpy().decode("utf-8")
+#         orig_texts.append(label)
 
-#     for img, text, ax in zip(batch_images, pred_texts, axes.flatten()):
-#         img = img.numpy().squeeze()
+#     _, ax = plt.subplots(4, 4, figsize=(15, 5))
+#     for i in range(len(pred_texts)):
+#         img = (batch_images[i, :, :, 0] * 255).numpy().astype(np.uint8)
 #         img = img.T
-
-#         ax.imshow(img, cmap='gray')
-#         ax.set_title(text)
-#         ax.set_axis_off()
+#         title = f"Prediction: {pred_texts[i]}"
+#         ax[i // 4, i % 4].imshow(img, cmap="gray")
+#         ax[i // 4, i % 4].set_title(title)
+#         ax[i // 4, i % 4].axis("off")
 # plt.show()
+for batch in validation_dataset.take(1):
+    batch_images = batch['image']
+    print(batch_images.dtype)
+
+    preds = prediction_model.predict(batch_images)
+    pred_texts = decode_batch_predictions(preds)
+
+    _, axes = plt.subplots(4, 4, figsize=(15, 5))
+
+    for img, text, ax in zip(batch_images, pred_texts, axes.flatten()):
+        img = img.numpy().squeeze()
+        img = img.T
+
+        ax.imshow(img, cmap='gray')
+        ax.set_title(text)
+        ax.set_axis_off()
+plt.show()
 
 # 예측 정확도 계산 함수
 def calculate_accuracy(prediction_model, validation_dataset):
