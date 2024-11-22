@@ -208,4 +208,5 @@ prediction_model = keras.models.Model(
 # prediction_model.summary()
 
 # Save model
-prediction_model.save('./model/model_save_test_1')
+# prediction_model.save('./model/model_save_test_1')
+prediction_model.save('./model/model7000.keras')
