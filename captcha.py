@@ -28,11 +28,11 @@ options.add_experimental_option("detach", True)
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 
 driver = webdriver.Chrome(options=options)
-url = "https://rtech.or.kr/MarketPrice/getMarketPriceDetail.do?categoryCd=1&aptSeq=2410&addrCode=1126010200&price_info=1"
+url = "https://rtech.or.kr/main/mapSearch.do?popUpYn=&posX=37.48243936583027&posY=127.06183029780048"
 driver.get(url)
 
 # 캡차 이미지 수집 횟수 설정
-capture_count = 200
+capture_count = 219
 
 for attempt in range(capture_count):
     try:
