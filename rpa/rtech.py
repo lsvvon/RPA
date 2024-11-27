@@ -1,6 +1,5 @@
 import ssl
 import os
-import urllib.request
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -14,9 +13,13 @@ from selenium.common.exceptions import TimeoutException
 from datetime import datetime
 from PIL import Image
 import os
+import urllib.request as req
+import ssl
+from io import BytesIO
+import predict_sh
 
 # SSL 인증서 검증 무시 설정
-# ssl._create_default_https_context = ssl._create_unverified_context
+ssl._create_default_https_context = ssl._create_unverified_context
 
 # 최대 시도 횟수 설정
 MAX_RETRIES = 3
@@ -45,27 +48,27 @@ while attempt < MAX_RETRIES:
             EC.element_to_be_clickable((By.NAME, 'do_code1'))
         )
         select = Select(select)
-        select.select_by_index(1)
+        select.select_by_index(5)
 
         # 2. 시군구 선택
         select_1 = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.NAME, 'city_code1'))
         )
         select_1 = Select(select_1)
-        select_1.select_by_index(1)
+        select_1.select_by_index(5)
 
         # 3. 읍면동 선택
         select_2 = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.NAME, 'dong_code1'))
         )
         select_2 = Select(select_2)
-        select_2.select_by_index(1)
+        select_2.select_by_index(12)
 
         # 4. 빠른검색 입력
         search_input = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.ID, "searchInput"))
         )
-        search_input.send_keys("상봉동 동부아파트")
+        search_input.send_keys("에드가리움 2차")
 
         # 5. 검색 결과 클릭
         quick_search_result = WebDriverWait(driver, 20).until(
@@ -89,52 +92,87 @@ while attempt < MAX_RETRIES:
         driver.execute_script("arguments[0].click();", ho_background)
 
         # 9. 동, 호수 선택
-        select_dong = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.NAME, 'dong_'))
-        )
-        select_dong = Select(select_dong)
-        select_dong.select_by_index(1)
-
-        select_ho = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.NAME, 'ho_'))
-        )
-        select_ho = Select(select_ho)
-        select_ho.select_by_index(1)
-
-        # # 10. 보안문자 (캡차 이미지 다운로드)
-        # # 보안문자 (캡차 이미지 다운로드 스크린샷 방식)
-        # captcha_img = WebDriverWait(driver, 20).until(
-        #     EC.presence_of_element_located((By.ID, "captchaImg"))
+        # select_dong = WebDriverWait(driver, 20).until(
+        #     EC.element_to_be_clickable((By.NAME, 'dong_'))
         # )
-
-        # # 전체 페이지 스크린샷 찍기
-        # screenshot_path = os.path.join(save_path, "full_screenshot.png")
-        # driver.save_screenshot(screenshot_path)
+        # select_dong = Select(select_dong)
+        # select_dong.select_by_index(1)
         
-        # # 캡차 이미지의 위치 및 크기 가져오기
-        # location = captcha_img.location
-        # size = captcha_img.size
-        # # 캡차 이미지 위치 및 크기 출력 (디버깅용)
-        # print(f"캡차 이미지 위치: {location}")
-        # print(f"캡차 이미지 크기: {size}")
-                
+        select_ho_element = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.ID, 'office_ho_code'))
+        )
+     
+        # 드롭다운의 옵션 가져오기
+        select_ho = Select(select_ho_element)
+        time.sleep(2)
+        # "601호"에 해당하는 옵션을 선택
+        desired_text = "오피스텔 601호"
+        options = select_ho.options  # 드롭다운의 모든 옵션
 
-        # # PIL로 스크린샷을 열어 위치에 따라 캡차 이미지를 자르기
-        # with Image.open(screenshot_path) as img:
-        #     left = location['x'] + 149
-        #     top = location['y'] + 90
-        #     right = left + size['width']
-        #     bottom = top + size['height']
-            
-        #     captcha = img.crop((left, top, right, bottom))
+        for index, option in enumerate(options):
+            if desired_text.strip() == option.text:  # 원하는 텍스트가 포함된 경우
+                select_ho.select_by_index(index)  # 해당 옵션 선택
+                break
+        else:
+            print(f"'{desired_text}'에 해당하는 호 옵션을 찾을 수 없습니다.")
 
-        #     # 캡차 이미지 파일명 생성
-        #     captcha_filename = os.path.join(save_path, f"captcha_image_{datetime.now().strftime('%Y%m%d%H%M%S')}.png")
-        #     captcha.save(captcha_filename)
-        #     print(f"캡차 이미지 {captcha_filename} 다운로드 완료")
+        # 10. 보안문자 (캡차 이미지 다운로드)
+        # 보안문자 (캡차 이미지 다운로드 스크린샷 방식)
+        # 전체 페이지의 사이즈를 구하여 브라우저의 창 크기를 확대하고 스크린캡처를 합니다.
+
+        save_path = r"C:\python\RPA\rpa\captcha_images_save"
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+
+        page_width = driver.execute_script('return document.body.parentNode.scrollWidth')
+        page_height = driver.execute_script('return document.body.parentNode.scrollHeight')
+        driver.set_window_size(page_width, page_height)
+        png = driver.get_screenshot_as_png()
+
+        captcha_img = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.ID, "office_captchaImg"))
+        )
+
+        element = captcha_img
+        image_location = element.location
+        image_size = element.size
+        
+        # 이미지를 element의 위치에 맞춰서 crop 하고 저장합니다.
+        im = Image.open(BytesIO(png))
+        left = image_location['x']
+        top = image_location['y']
+        right = image_location['x'] + image_size['width']
+        bottom = image_location['y'] + image_size['height']
+        im = im.crop((left, top, right, bottom))
+
+        captcha_filename = os.path.join(save_path, "capcha.png")
+        im.save(captcha_filename)
+
+        captcha_input = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.ID, "office_capcha"))
+        )
+        time.sleep(5)
+
+        captcha_input.send_keys(predict_sh.get_predictions())
+
+        # 11. 확인 버튼 누른 뒤 화면 캡쳐하기
+        confirm_button = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[@onclick='javascript:office_search_dongho_price()']"))
+        )
+        confirm_button.click()
+        time.sleep(5)
+
+        # 저장할 폴더 경로 지정
+        folder_path = r"C:\python\RPA\rpa\rtech_capImg"
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        # 파일 경로 설정
+        screenshot_path = os.path.join(folder_path, "full_page_screenshot.png")
+        driver.save_screenshot(screenshot_path)
 
         # 마지막 대기
-        time.sleep(2)
+        time.sleep(10)
 
         # 캡처 완료 후 루프를 탈출하도록 시도 횟수를 최대값으로 설정
         attempt = MAX_RETRIES
@@ -146,5 +184,5 @@ while attempt < MAX_RETRIES:
 
     finally:
         if attempt >= MAX_RETRIES:
-            print("최대 시도 횟수 초과, 프로그램 종료.")
+            print("프로그램 종료.")
             driver.quit()
