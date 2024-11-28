@@ -7,6 +7,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 import time
 from datetime import datetime
+import full_screenshot
+import os
 
 # 최대 시도 횟수 설정
 MAX_RETRIES = 3
@@ -27,10 +29,8 @@ while attempt < MAX_RETRIES:
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))
         )
-        print("페이지가 로드되었습니다.")
 
         # 1. input이 포함된 div 요소 기다리기
-        print("1. input이 포함된 div 요소 기다리기")
         input_div = WebDriverWait(driver, 20).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, ".homeSerchBox"))
         )
@@ -39,7 +39,6 @@ while attempt < MAX_RETRIES:
         driver.execute_script("arguments[0].click();", input_div)
         
         # input 요소가 나타날 때까지 기다린 후 주소 입력
-        print("2. input 요소가 나타날 때까지 기다린 후 주소 입력")
         input_element = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, ".form-control"))
         )
@@ -47,14 +46,12 @@ while attempt < MAX_RETRIES:
         input_element.send_keys(Keys.ENTER)
 
         # 면적 select 요소가 나타날 때까지 기다리고 클릭
-        print("3. 면적 select 요소가 나타날 때까지 기다리고 클릭")
         area_select_div = WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, ".widthTypeValue"))
         )
         driver.execute_script("arguments[0].click();", area_select_div)
 
         # 면적 목록 요소 기다리기
-        print("4. 면적 목록 요소 기다리기")
         area_elements = WebDriverWait(driver, 10).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tdbold"))
         )
@@ -67,7 +64,6 @@ while attempt < MAX_RETRIES:
             area_list.append(size)
 
         # 면적 리스트에서 원하는 값 찾기
-        print("5. 면적 값 찾기 및 클릭")
         for i in range(len(area_list)):
             cnt += 1
             if area_data in area_list[i]:
@@ -82,13 +78,15 @@ while attempt < MAX_RETRIES:
         # 화면 캡처 전 몇 초간 기다리기 (화면 로딩 완료 대기)
         time.sleep(3)
 
-        # 현재 시간 기반으로 파일명 변경
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        screenshot_path = f'C:/시세조사/kb부동산_관리번호_{timestamp}.png'
+        # 저장할 폴더 경로 지정
+        folder_path = r"C:\python\RPA\rpa\KBland_capImg"
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
 
-        # 화면 캡처
-        driver.save_screenshot(screenshot_path)
-        print(f"캡처 완료: {screenshot_path}")
+        # 파일 경로 설정
+        screenshot_path = os.path.join(folder_path, "full_page_screenshot.png")
+        full_screenshot.capture_full_page(driver, screenshot_path)
+        print(f"전체 페이지 스크린샷 저장 완료: {screenshot_path}")
                 
         # 캡처 완료 후 루프를 탈출하도록 시도 횟수를 최대값으로 설정
         attempt = MAX_RETRIES
@@ -100,5 +98,5 @@ while attempt < MAX_RETRIES:
 
     finally:
         if attempt >= MAX_RETRIES:
-            print("최대 시도 횟수 초과, 프로그램 종료.")
+            print("프로그램 종료.")
             driver.quit()
