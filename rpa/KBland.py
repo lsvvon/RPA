@@ -25,6 +25,14 @@ while attempt < MAX_RETRIES:
         url = "https://kbland.kr/map?xy=37.5205559,126.9265729,17"
         driver.get(url)
 
+        # 팝업창 종료
+        main = driver.window_handles
+
+        for i in main:
+            if i != main[0]:
+                driver.switch_to.window(i)
+                driver.close()
+
         # 페이지 로드가 완료될 때까지 기다리기
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.TAG_NAME, "body"))

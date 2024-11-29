@@ -42,7 +42,16 @@ while attempt < MAX_RETRIES:
 
         url = "https://rtech.or.kr/main/mapSearch.do?posX="
         driver.get(url)
+        # 현재 창 정보
+        main_window = driver.current_window_handle
 
+        # 팝업 창 닫기 (모든 팝업 창을 닫고 메인 창으로 돌아오기)
+        for window in driver.window_handles:
+            if window != main_window:
+                driver.switch_to.window(window)
+                driver.close()
+
+                
         # 1. 시도 선택
         select = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.NAME, 'do_code1'))

@@ -24,6 +24,16 @@ while attempt < MAX_RETRIES:
         driver = webdriver.Chrome(options=options)
         url = "https://hometax.go.kr/websquare/websquare.html?w2xPath=/ui/pp/index_pp.xml&menuCd=index2"
         driver.get(url)
+
+        # 현재 창 정보
+        main_window = driver.current_window_handle
+
+        # 팝업 창 닫기 (모든 팝업 창을 닫고 메인 창으로 돌아오기)
+        for window in driver.window_handles:
+            if window != main_window:
+                driver.switch_to.window(window)
+                driver.close()
+
         
         time.sleep(10)
 
