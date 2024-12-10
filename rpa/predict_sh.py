@@ -57,7 +57,7 @@ characters = ['2', '3', '4', '5', '6', '7', '8', 'a', 'b', 'c', 'd', 'e', 'f', '
 
 # $$$
 # 모텔 로드
-prediction_model = load_model('./model5000.keras')
+prediction_model = load_model(r'C:\python\RPA\rpa\model5000.keras')
 # prediction_model.summary()
 
 """
