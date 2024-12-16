@@ -10,7 +10,8 @@ try:
     while attempt < MAX_RETRIES:
         driver = common_module.initialize_driver()
         try:
-            wetax_module.wetax_officetel(driver)
+            result = wetax_module.wetax_officetel(driver)
+            print(result)
             common_module.screenshot_save(driver, "rtech_capImg")
             print("프로그램이 정상적으로 실행되었습니다.")
             break  # 성공하면 반복 종료

@@ -4,13 +4,18 @@ import common_module
 
 MAX_RETRIES = 1
 attempt = 0
-
+building = 'officetel'
+company = 'HUG'
 try:
     while attempt < MAX_RETRIES:
         driver = common_module.initialize_driver()
         try:
-            rtech_module.rtech_app_roadnum(driver)
-            rtech_module.captcha(driver)
+            rtech_module.rtech_roadnum(driver)
+            if company == 'HF':
+                rtech_module.search_HF(driver)
+            elif company == 'HUG':
+                rtech_module.captcha_HUG(driver, building)
+            #print(rtech_module.captcha_HUG(driver,building))
             common_module.screenshot_save(driver, "rtech_capImg")
             print("프로그램이 정상적으로 실행되었습니다.")
             break  # 성공하면 반복 종료

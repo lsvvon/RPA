@@ -1,10 +1,9 @@
 import KBland_module
 import common_module
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.chrome.options import Options
-from selenium import webdriver
 
-MAX_RETRIES = 1
+
+MAX_RETRIES = 3
 attempt = 0
 driver = None  # 드라이버를 루프 외부에서 선언
 
@@ -12,7 +11,8 @@ try:
     while attempt < MAX_RETRIES:
         driver = common_module.initialize_driver()
         try:
-            KBland_module.KBland_streetnum(driver)
+            result = KBland_module.KBland_streetnum(driver)
+            print(result)
             common_module.screenshot_save(driver, "KBland_capImg")
             break  # 성공하면 반복 종료
 

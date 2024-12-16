@@ -1,14 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.chrome.options import Options
-import urllib.request
 import time
-import os
+
 
 def etax_officetel(driver):
     url = "https://etax.seoul.go.kr"
@@ -106,6 +103,20 @@ def etax_officetel(driver):
     driver.execute_script("searchB();", search_button)
 
     time.sleep(3)
+
+    # XPath로 "69,767,826 원" 값이 있는 <td> 요소 찾기
+    td_element = WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.XPATH, "//tr/td[@class='right' and not(contains(@class, 'last'))]"))
+    )
+    
+    # 텍스트 값 추출
+    raw_text = td_element.text.strip()  # '69,767,826 원' 형태
+    
+    # 쉼표와 단위 제거 및 숫자 변환
+    numeric_value = int(raw_text.replace(",", "").replace(" 원", ""))
+    print(f"Numeric value: {numeric_value}")  # 출력: 69767826
+    
+    return numeric_value
 
 
 

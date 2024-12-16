@@ -10,7 +10,7 @@ try:
     while attempt < MAX_RETRIES:
         driver = common_module.initialize_driver()
         try:
-            realtyprice_module.realtyprice_land_roadnum(driver)
+            realtyprice_module.realtyprice_individual_roadnum(driver)
             common_module.screenshot_save(driver, "realtyprice_capImg")
             print("프로그램이 정상적으로 실행되었습니다.")
             break  # 성공하면 반복 종료

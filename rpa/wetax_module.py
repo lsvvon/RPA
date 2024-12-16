@@ -1,12 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.chrome.options import Options
-import urllib.request
 import time
 import os
 
@@ -18,15 +16,18 @@ def wetax_officetel(driver):
 
     # 관할 자치단체 선택
     ctpv_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "ctpvCd")))
-    Select(ctpv_cd).select_by_index(1)
+    select = Select(ctpv_cd)
+    select.select_by_visible_text("경상남도")
     time.sleep(3)
 
     sgg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "sggCd")))
-    Select(sgg_cd).select_by_index(1)
+    select = Select(sgg_cd)
+    select.select_by_visible_text("김해시")
     time.sleep(3)
 
     stdg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "stdgCd")))
-    Select(stdg_cd).select_by_index(1)
+    select = Select(stdg_cd)
+    select.select_by_visible_text("내동")
     time.sleep(3)
 
     # 기준연도 선택
@@ -41,7 +42,7 @@ def wetax_officetel(driver):
 
     # 본번지 입력
     txt_exst_prlno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "txtExstPrlno")))
-    txt_exst_prlno.send_keys("2255")
+    txt_exst_prlno.send_keys("1136")
     txt_exst_prlno.send_keys(Keys.ENTER)
     time.sleep(3)
 
@@ -53,13 +54,13 @@ def wetax_officetel(driver):
 
     # 건물 동 입력
     bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bldgDaddr")))
-    bsno.send_keys("4")
+    bsno.send_keys("")
     bsno.send_keys(Keys.ENTER)
     time.sleep(3)
 
     # 건물 호 입력
     bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bldgHoadr")))
-    bsno.send_keys("4")
+    bsno.send_keys("1301")
     bsno.send_keys(Keys.ENTER)
     time.sleep(3)
 
@@ -67,5 +68,19 @@ def wetax_officetel(driver):
     btn_srch_blds_cpb = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, "btnSrchBldsCpb")))
     btn_srch_blds_cpb.click()
 
+    time.sleep(3)
+
+    # <td> 또는 <span> 요소 찾기
+    span_element = WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.XPATH, "//td[@class='a-r']/span[@class='roboto']"))
+    )
+    
+    # 텍스트 값 가져오기
+    raw_text = span_element.text.strip()  # 예: '82,198,449'
+    # 쉼표 제거 및 숫자로 변환
+    numeric_value = int(raw_text.replace(",", ""))
+    print(f"Numeric value: {numeric_value}")  # 출력: 82198449
+    
+    return numeric_value 
 
 
