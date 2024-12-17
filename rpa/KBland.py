@@ -11,7 +11,7 @@ try:
     while attempt < MAX_RETRIES:
         driver = common_module.initialize_driver()
         try:
-            result = KBland_module.KBland_streetnum(driver)
+            result = KBland_module.KBland_roadnum(driver)
             print(result)
             common_module.screenshot_save(driver, "KBland_capImg")
             break  # 성공하면 반복 종료
