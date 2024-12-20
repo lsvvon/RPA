@@ -9,6 +9,7 @@ def initialize_driver():
     options.add_argument("--start-maximized")
     options.add_experimental_option("detach", True)
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('excludeSwitches', ['disable-popup-blocking'])
     return webdriver.Chrome(options=options)
 
 def screenshot_save(driver,site):

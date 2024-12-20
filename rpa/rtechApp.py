@@ -1,4 +1,4 @@
-import rtech_module
+import rtechApp_module
 from selenium.common.exceptions import TimeoutException
 import common_module
 
@@ -7,8 +7,6 @@ MAX_RETRIES = 1
 
 def main():
     attempt = 0
-    building = 'officetel' # 아파트 or 오피스텔
-    company = 'HF' # HUG or HF
     searchType = 'road' # 지번 or 도로명
 
     try:
@@ -16,21 +14,15 @@ def main():
             driver = common_module.initialize_driver()
             try:
                 if searchType == 'street': # 지번검색일때
-                    rtech_module.rtech_streetnum(driver)
-                    if company == 'HF':
-                        rtech_module.search_HF(driver)
-                    elif company == 'HUG':
-                        rtech_module.captcha_HUG(driver, building)
+                    rtechApp_module.rtech_app_streetnum(driver)
+                    rtechApp_module.captcha_APP(driver)
                     #print(rtech_module.captcha_HUG(driver,building))
                     common_module.screenshot_save(driver, "rtech_capImg")
                     print("프로그램이 정상적으로 실행되었습니다.")
                     break 
                 elif searchType == 'road': # 도로명검색일때
-                    rtech_module.rtech_roadnum(driver)
-                    if company == 'HF':
-                        rtech_module.search_HF(driver)
-                    elif company == 'HUG':
-                        rtech_module.captcha_HUG(driver, building)
+                    rtechApp_module.rtech_app_roadnum(driver)
+                    rtechApp_module.captcha_APP(driver)
                     #print(rtech_module.captcha_HUG(driver,building))
                     common_module.screenshot_save(driver, "rtech_capImg")
                     print("프로그램이 정상적으로 실행되었습니다.")

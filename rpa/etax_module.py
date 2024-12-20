@@ -5,13 +5,36 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.chrome.options import Options
 import time
-
+from selenium.common.exceptions import TimeoutException
 
 def etax_officetel(driver):
     url = "https://etax.seoul.go.kr"
     driver.get(url)
 
     time.sleep(5)
+
+    try:
+        # iframe 내로 전환
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.TAG_NAME, "iframe"))
+        )
+        driver.switch_to.frame(iframe)
+
+        # 닫기 버튼을 찾기 위한 XPath
+        close_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//img[@alt='닫기' and contains(@style, 'position: absolute')]"))
+        )
+        # 버튼 클릭
+        driver.execute_script("arguments[0].click();", close_button)
+        print("팝업 닫기 버튼 클릭 완료.")
+        # iframe에서 메인 페이지로 돌아가기
+        driver.switch_to.default_content()
+    except TimeoutException:
+        print("모달 닫기 버튼이 존재하지 않음.")
+        driver.switch_to.default_content()
+    except Exception as e:
+        print(f"팝업 닫기 버튼 클릭 중 예외 발생: {e}")
+        driver.switch_to.default_content()
 
     # 현재 창 정보
     main_window = driver.current_window_handle
@@ -22,7 +45,7 @@ def etax_officetel(driver):
             driver.switch_to.window(window)
             driver.close()
             
-
+    
     # Switch to iframe
     iframe = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.TAG_NAME, "iframe"))

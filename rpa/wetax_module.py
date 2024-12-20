@@ -7,12 +7,35 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.chrome.options import Options
 import time
 import os
-
+from selenium.common.exceptions import TimeoutException
 def wetax_officetel(driver):
     url = "https://www.wetax.go.kr/tcp/loi/J030401M01.do"
     driver.get(url)
 
     time.sleep(5)
+    try:
+        # iframe 내로 전환
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.TAG_NAME, "iframe"))
+        )
+        driver.switch_to.frame(iframe)
+
+        # 닫기 버튼을 찾기 위한 XPath
+        close_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//img[@alt='닫기' and contains(@style, 'position: absolute')]"))
+        )
+        # 버튼 클릭
+        driver.execute_script("arguments[0].click();", close_button)
+        print("팝업 닫기 버튼 클릭 완료.")
+        # iframe에서 메인 페이지로 돌아가기
+        driver.switch_to.default_content()
+    except TimeoutException:
+        print("모달 닫기 버튼이 존재하지 않음.")
+        driver.switch_to.default_content()
+    except Exception as e:
+        print(f"팝업 닫기 버튼 클릭 중 예외 발생: {e}")
+        driver.switch_to.default_content()
+    
 
     # 관할 자치단체 선택
     ctpv_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "ctpvCd")))
@@ -77,6 +100,7 @@ def wetax_officetel(driver):
     
     # 텍스트 값 가져오기
     raw_text = span_element.text.strip()  # 예: '82,198,449'
+
     # 쉼표 제거 및 숫자로 변환
     numeric_value = int(raw_text.replace(",", ""))
     print(f"Numeric value: {numeric_value}")  # 출력: 82198449

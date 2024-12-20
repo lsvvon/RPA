@@ -24,6 +24,7 @@ def rtech_streetnum(driver):
             driver.switch_to.window(window)
             driver.close()
 
+    time.sleep(5)
     # 1. 시도 선택
     select = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.NAME, 'do_code1'))
@@ -49,20 +50,56 @@ def rtech_streetnum(driver):
     search_input = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, "searchInput"))
     )
-    search_input.send_keys("상봉동 동부아파트")
+    search_address = "고덕그라시움"
+    search_input.send_keys(search_address)
 
-    # 5. 검색 결과 클릭
-    quick_search_result = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.ID, "quickSearchResult"))
+    time.sleep(3)
+    # 2. 검색 결과 리스트 확인
+    results_ul = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.ID, "quickSearchResult"))
     )
-    quick_search_result.click()
+    result_items = results_ul.find_elements(By.TAG_NAME, "li")  # 검색 결과 리스트의 각 항목
+    
+    time.sleep(3)
+    # "검색 결과가 없습니다." 
+    for item in result_items:
+        if "검색 결과가 없습니다." in item.text:
+            print("검색 결과가 없습니다. 프로그램을 종료합니다.")
+            return None  # 종료
     time.sleep(3)
 
+    # 완전 일치하는 항목 찾기
+    matching_item = None
+    search_keywords = search_address.split() 
+
+    for item in result_items:
+        item_text = item.text.replace(" ", "")  # 공백 제거 후 비교
+        # 각 검색어가 항목에 포함되는지 확인
+        if all(keyword in item_text for keyword in search_keywords):
+            matching_item = item
+            break
+
+    time.sleep(5)
+    if matching_item:
+        print(f"일치하는 주소 '{search_address}'를 찾았습니다. 클릭합니다.")
+        driver.execute_script("arguments[0].scrollIntoView(true);", matching_item)
+        matching_item.click()
+    else:
+        print(f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다.")
+        return None
+    
+    time.sleep(3)
+    # 3. 해당 아파트 항목 클릭
+    building_name = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "map_pop_infobox_tit1"))
+    )
+    time.sleep(3)
     apt_element = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//ul[@id='aptListArea']//li/a[contains(text(), '동부아파트')]"))
+        EC.element_to_be_clickable((By.XPATH, f"//ul[@id='aptListArea']//li/a[contains(text(), '{building_name.text}')]"))
     )
     driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
     apt_element.click()
+
 
 def rtech_roadnum(driver): 
     url = "https://rtech.or.kr/main/mapSearch.do?posX="
@@ -76,30 +113,72 @@ def rtech_roadnum(driver):
             driver.switch_to.window(window)
             driver.close()
 
+
     # 1. 빠른검색 입력
     search_input = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, "searchInput"))
     )
-    search_input.send_keys("고덕로 333")
+    search_address = "고덕로 333"
+    search_input.send_keys(search_address)
 
-    # 2. 검색 결과 클릭
-    quick_search_result = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.ID, "quickSearchResult"))
+    time.sleep(3)
+
+    # 2. 검색 결과 리스트 확인
+    results_ul = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.ID, "quickSearchResult"))
     )
-    quick_search_result.click()
+    result_items = results_ul.find_elements(By.TAG_NAME, "li")  # 검색 결과 리스트의 각 항목
 
+    # "검색 결과가 없습니다." 
+    for item in result_items:
+        if "검색 결과가 없습니다." in item.text:
+            print("검색 결과가 없습니다. 프로그램을 종료합니다.")
+            return None  # 종료
+        
+    time.sleep(3)
+    # 완전 일치하는 항목 찾기
+    matching_item = None
+    search_keywords = search_address.split() 
+
+    for item in result_items:
+        item_text = item.text.replace(" ", "")  # 공백 제거 후 비교
+        # 각 검색어가 항목에 포함되는지 확인
+        if all(keyword in item_text for keyword in search_keywords):
+            matching_item = item
+            break
+
+    time.sleep(5)
+    if matching_item:
+        print(f"일치하는 주소 '{search_address}'를 찾았습니다. 클릭합니다.")
+        driver.execute_script("arguments[0].scrollIntoView(true);", matching_item)
+        matching_item.click()
+    else:
+        print(f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다.")
+        return None
+    
+    
+    time.sleep(3)
+    # 3. 해당 아파트 항목 클릭
+    building_name = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "map_pop_infobox_tit1"))
+    )
+    
     apt_element = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//ul[@id='aptListArea']//li/a[contains(text(), '고덕그라시움')]"))
+        EC.element_to_be_clickable((By.XPATH, f"//ul[@id='aptListArea']//li/a[contains(text(), '{building_name.text}')]"))
     )
     driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
     apt_element.click()
 
 
-
 def captcha_HUG(driver, building):
-    # 팝업창으로 창 전환
-    driver.switch_to.window(driver.window_handles[1])
-    time.sleep(3)
+    # 팝업창 확인 후 처리
+    if len(driver.window_handles) > 1:
+        print("팝업창이 감지되었습니다. 팝업창으로 전환합니다.")
+        driver.switch_to.window(driver.window_handles[1])
+        time.sleep(3)
+    else:
+        print("팝업창이 감지되지 않았습니다. 현재 화면에서 캡처를 진행합니다.")
+        return None
 
     # 8. 팝업 내 '호별 시세조회' 요소 클릭
     ho_background = WebDriverWait(driver, 20).until(
@@ -169,6 +248,42 @@ def captcha_HUG(driver, building):
         )
         confirm_button.click()
         time.sleep(5)
+
+        # 호별시세 안나오는 경우, 면적별 시세 조회
+        try:
+            alert = WebDriverWait(driver, 5).until(EC.alert_is_present())
+            if alert:
+                alert.accept()
+                size_background = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.ID, "pyongMarketPriceTitle"))
+                )
+                driver.execute_script("javascript:infotabChange(1);", size_background)
+
+                # 하한평균가
+                element_low = WebDriverWait(driver, 20).until(
+                    EC.visibility_of_element_located((By.XPATH, "//td[@class='table_txt_blue'][1]"))
+                )
+                # 상향평균가
+                element_high = WebDriverWait(driver, 20).until(
+                    EC.visibility_of_element_located((By.XPATH, "//td[@class='table_txt_red'][1]"))
+                )
+                
+                # 텍스트 값 가져오기
+                raw_element_low = element_low.text.strip()
+                print(f"Raw text: {raw_element_low}")
+                raw_element_high = element_high.text.strip()
+                print(f"Raw text: {raw_element_high}")
+
+                # 쉼표 제거 및 숫자로 변환
+                numeric_value_low = int(raw_element_low.replace(",", ""))
+                print(f"Numeric value: {numeric_value_low}")
+                numeric_value_high = int(raw_element_high.replace(",", ""))
+                print(f"Numeric value: {numeric_value_high}")
+
+                return numeric_value_low, numeric_value_high
+                
+        except TimeoutException:
+            print("Alert did not appear.")
 
         # 하한평균가
         element_low = WebDriverWait(driver, 20).until(
@@ -247,7 +362,7 @@ def captcha_HUG(driver, building):
         confirm_button.click()
         time.sleep(5)
 
-        # 호텔시세 안나오는 경우, 면적별 시세 조회
+        # 호별시세 안나오는 경우, 면적별 시세 조회
         try:
             alert = WebDriverWait(driver, 5).until(EC.alert_is_present())
             if alert:
@@ -278,10 +393,7 @@ def captcha_HUG(driver, building):
                 numeric_value_high = int(raw_element_high.replace(",", ""))
                 print(f"Numeric value: {numeric_value_high}")
 
-                if building == 'apt':
-                    return (numeric_value_low + numeric_value_high) / 2
-                elif building == 'officetel':
-                    return numeric_value_low
+                return numeric_value_low
                 
         except TimeoutException:
             print("Alert did not appear.")
@@ -344,21 +456,56 @@ def rtech_app_streetnum(driver):
     search_input = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, "searchInput"))
     )
-    search_input.send_keys("개포자이르네")
-    time.sleep(3)
+    search_address = "고덕그라시움"
+    search_input.send_keys(search_address)
 
-    # 5. 검색 결과 클릭
-    quick_search_result = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.ID, "quickSearchResult"))
+    time.sleep(3)
+    # 2. 검색 결과 리스트 확인
+    results_ul = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.ID, "quickSearchResult"))
     )
-    quick_search_result.click()
+    result_items = results_ul.find_elements(By.TAG_NAME, "li")  # 검색 결과 리스트의 각 항목
+    
+    time.sleep(3)
+    # "검색 결과가 없습니다." 
+    for item in result_items:
+        if "검색 결과가 없습니다." in item.text:
+            print("검색 결과가 없습니다. 프로그램을 종료합니다.")
+            return None  # 종료
     time.sleep(3)
 
+    # 완전 일치하는 항목 찾기
+    matching_item = None
+    search_keywords = search_address.split() 
+
+    for item in result_items:
+        item_text = item.text.replace(" ", "")  # 공백 제거 후 비교
+        # 각 검색어가 항목에 포함되는지 확인
+        if all(keyword in item_text for keyword in search_keywords):
+            matching_item = item
+            break
+
+    time.sleep(5)
+    if matching_item:
+        print(f"일치하는 주소 '{search_address}'를 찾았습니다. 클릭합니다.")
+        driver.execute_script("arguments[0].scrollIntoView(true);", matching_item)
+        matching_item.click()
+    else:
+        print(f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다.")
+        return None
+    
+    time.sleep(3)
+    # 3. 해당 아파트 항목 클릭
+    building_name = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "map_pop_infobox_tit1"))
+    )
+    time.sleep(3)
     apt_element = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//ul[@id='aptListArea']//li/a[contains(text(), '개포자이르네')]"))
+        EC.element_to_be_clickable((By.XPATH, f"//ul[@id='aptListArea']//li/a[contains(text(), '{building_name.text}')]"))
     )
     driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
     apt_element.click()
+
 
 def rtech_app_roadnum(driver):
     url = "https://www.rtech.or.kr/main/mapSearch_mp.do?popUpYn=&posX=37.48243936583027&posY=127.06183029780048#"
@@ -377,28 +524,71 @@ def rtech_app_roadnum(driver):
     )
     close_button.click()
 
-    # 1. 빠른검색 입력
+    # 4. 빠른검색 입력
     search_input = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, "searchInput"))
     )
-    search_input.send_keys("고덕로 10길 30")
+    search_address = "고덕그라시움"
+    search_input.send_keys(search_address)
 
-    # 2. 검색 결과 클릭
-    quick_search_result = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.ID, "quickSearchResult"))
+    time.sleep(3)
+    # 검색 결과 리스트 확인
+    results_ul = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.ID, "quickSearchResult"))
     )
-    quick_search_result.click()
+    result_items = results_ul.find_elements(By.TAG_NAME, "li")  # 검색 결과 리스트의 각 항목
+    
+    time.sleep(3)
+    # "검색 결과가 없습니다." 
+    for item in result_items:
+        if "검색 결과가 없습니다." in item.text:
+            print("검색 결과가 없습니다. 프로그램을 종료합니다.")
+            return None  # 종료
+    time.sleep(3)
 
+    # 완전 일치하는 항목 찾기
+    matching_item = None
+    search_keywords = search_address.split() 
+
+    for item in result_items:
+        item_text = item.text.replace(" ", "")  # 공백 제거 후 비교
+        # 각 검색어가 항목에 포함되는지 확인
+        if all(keyword in item_text for keyword in search_keywords):
+            matching_item = item
+            break
+
+    time.sleep(5)
+    if matching_item:
+        print(f"일치하는 주소 '{search_address}'를 찾았습니다. 클릭합니다.")
+        driver.execute_script("arguments[0].scrollIntoView(true);", matching_item)
+        matching_item.click()
+    else:
+        print(f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다.")
+        return None
+    
+    time.sleep(3)
+    # 3. 해당 아파트 항목 클릭
+    building_name = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "map_pop_infobox_tit1"))
+    )
+    time.sleep(3)
     apt_element = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//ul[@id='aptListArea']//li/a[contains(text(), '우암쎈스뷰')]"))
+        EC.element_to_be_clickable((By.XPATH, f"//ul[@id='aptListArea']//li/a[contains(text(), '{building_name.text}')]"))
     )
     driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
     apt_element.click()
 
 
 def search_HF(driver):
-    # 팝업창으로 창 전환
-    driver.switch_to.window(driver.window_handles[1])
+    # 팝업창 확인 후 처리
+    if len(driver.window_handles) > 1:
+        print("팝업창이 감지되었습니다. 팝업창으로 전환합니다.")
+        driver.switch_to.window(driver.window_handles[1])
+        time.sleep(3)
+    else:
+        print("팝업창이 감지되지 않았습니다. 현재 화면에서 캡처를 진행합니다.")
+        return None
+    
     time.sleep(3)
 
     # 하한평균가
@@ -428,8 +618,15 @@ def search_HF(driver):
     
 
 def captcha_APP(driver):
-    # 팝업창으로 창 전환
-    driver.switch_to.window(driver.window_handles[1])
+    # 팝업창 확인 후 처리
+    if len(driver.window_handles) > 1:
+        print("팝업창이 감지되었습니다. 팝업창으로 전환합니다.")
+        driver.switch_to.window(driver.window_handles[1])
+        time.sleep(3)
+    else:
+        print("팝업창이 감지되지 않았습니다. 현재 화면에서 캡처를 진행합니다.")
+        return None
+
     time.sleep(3)
 
     # 8. 팝업 내 '호별 시세조회' 요소 클릭

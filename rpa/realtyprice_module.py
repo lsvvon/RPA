@@ -4,7 +4,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import time
 from selenium.webdriver.support.select import Select
-
+from selenium.common.exceptions import TimeoutException
 
 # 공동주택(아파트, 다세대)일 경우 - 지번 검색
 def realtyprice_apt_streetnum(driver):
@@ -15,6 +15,29 @@ def realtyprice_apt_streetnum(driver):
     WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.TAG_NAME, "body"))
     )
+
+    try:
+        # 팝업 div이 포함된 iframe으로 전환
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div#wrap_pop_no iframe.b-iframe"))
+        )
+        driver.switch_to.frame(iframe)
+
+        close_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@type='image' and contains(@onclick, 'closeWin')]"))
+        )
+        driver.execute_script("arguments[0].click();", close_button)
+        # iframe에서 메인 페이지로 돌아가기
+        driver.switch_to.default_content()
+        time.sleep(1)  # 버튼 클릭 후 잠시 대기
+
+    except TimeoutException:
+        print("모달 닫기 버튼이 존재하지 않음.")
+        driver.switch_to.default_content()
+    except Exception as e:
+        print(f"모달 닫기 중 예외 발생: {e}")
+        driver.switch_to.default_content()
+    
 
     # 현재 창 정보
     main_window = driver.current_window_handle
@@ -151,6 +174,28 @@ def realtyprice_apt_roadnum(driver):
         EC.presence_of_element_located((By.TAG_NAME, "body"))
     )
 
+    try:
+        # 팝업 div이 포함된 iframe으로 전환
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div#wrap_pop_no iframe.b-iframe"))
+        )
+        driver.switch_to.frame(iframe)
+
+        close_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@type='image' and contains(@onclick, 'closeWin')]"))
+        )
+        driver.execute_script("arguments[0].click();", close_button)
+        # iframe에서 메인 페이지로 돌아가기
+        driver.switch_to.default_content()
+        time.sleep(1)  # 버튼 클릭 후 잠시 대기
+
+    except TimeoutException:
+        print("모달 닫기 버튼이 존재하지 않음.")
+        driver.switch_to.default_content()
+    except Exception as e:
+        print(f"모달 닫기 중 예외 발생: {e}")
+        driver.switch_to.default_content()
+
     # 현재 창 정보
     main_window = driver.current_window_handle
 
@@ -265,6 +310,28 @@ def realtyprice_individual_streetnum(driver):
         EC.presence_of_element_located((By.TAG_NAME, "body"))
     )
 
+    try:
+        # 팝업 div이 포함된 iframe으로 전환
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div#wrap_pop_no iframe.b-iframe"))
+        )
+        driver.switch_to.frame(iframe)
+
+        close_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@type='image' and contains(@onclick, 'closeWin')]"))
+        )
+        driver.execute_script("arguments[0].click();", close_button)
+        # iframe에서 메인 페이지로 돌아가기
+        driver.switch_to.default_content()
+        time.sleep(1)  # 버튼 클릭 후 잠시 대기
+
+    except TimeoutException:
+        print("모달 닫기 버튼이 존재하지 않음.")
+        driver.switch_to.default_content()
+    except Exception as e:
+        print(f"모달 닫기 중 예외 발생: {e}")
+        driver.switch_to.default_content()
+
     # 현재 창 정보
     main_window = driver.current_window_handle
 
@@ -362,6 +429,28 @@ def realtyprice_individual_roadnum(driver):
         EC.presence_of_element_located((By.TAG_NAME, "body"))
     )
 
+    try:
+        # 팝업 div이 포함된 iframe으로 전환
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div#wrap_pop_no iframe.b-iframe"))
+        )
+        driver.switch_to.frame(iframe)
+
+        close_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@type='image' and contains(@onclick, 'closeWin')]"))
+        )
+        driver.execute_script("arguments[0].click();", close_button)
+        # iframe에서 메인 페이지로 돌아가기
+        driver.switch_to.default_content()
+        time.sleep(1)  # 버튼 클릭 후 잠시 대기
+
+    except TimeoutException:
+        print("모달 닫기 버튼이 존재하지 않음.")
+        driver.switch_to.default_content()
+    except Exception as e:
+        print(f"모달 닫기 중 예외 발생: {e}")
+        driver.switch_to.default_content()
+
     # 현재 창 정보
     main_window = driver.current_window_handle
 
@@ -374,6 +463,8 @@ def realtyprice_individual_roadnum(driver):
 
     # 메인 창으로 전환
     driver.switch_to.window(main_window)
+
+    time.sleep(3)
 
     # "개별단독주택공시가격"으로 이동
     link_element = WebDriverWait(driver, 20).until(
@@ -466,6 +557,28 @@ def realtyprice_land_streetnum(driver):
     WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.TAG_NAME, "body"))
     )
+
+    try:
+        # 팝업 div이 포함된 iframe으로 전환
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div#wrap_pop_no iframe.b-iframe"))
+        )
+        driver.switch_to.frame(iframe)
+
+        close_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@type='image' and contains(@onclick, 'closeWin')]"))
+        )
+        driver.execute_script("arguments[0].click();", close_button)
+        # iframe에서 메인 페이지로 돌아가기
+        driver.switch_to.default_content()
+        time.sleep(1)  # 버튼 클릭 후 잠시 대기
+
+    except TimeoutException:
+        print("모달 닫기 버튼이 존재하지 않음.")
+        driver.switch_to.default_content()
+    except Exception as e:
+        print(f"모달 닫기 중 예외 발생: {e}")
+        driver.switch_to.default_content()
 
     # 현재 창 정보
     main_window = driver.current_window_handle
@@ -565,6 +678,28 @@ def realtyprice_land_roadnum(driver):
     WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.TAG_NAME, "body"))
     )
+
+    try:
+        # 팝업 div이 포함된 iframe으로 전환
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div#wrap_pop_no iframe.b-iframe"))
+        )
+        driver.switch_to.frame(iframe)
+
+        close_button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@type='image' and contains(@onclick, 'closeWin')]"))
+        )
+        driver.execute_script("arguments[0].click();", close_button)
+        # iframe에서 메인 페이지로 돌아가기
+        driver.switch_to.default_content()
+        time.sleep(1)  # 버튼 클릭 후 잠시 대기
+
+    except TimeoutException:
+        print("모달 닫기 버튼이 존재하지 않음.")
+        driver.switch_to.default_content()
+    except Exception as e:
+        print(f"모달 닫기 중 예외 발생: {e}")
+        driver.switch_to.default_content()
 
     # 현재 창 정보
     main_window = driver.current_window_handle

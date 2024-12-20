@@ -1,33 +1,53 @@
-from selenium.common.exceptions import TimeoutException
-import common_module
-import etax_module 
-import hometax_module
-import KBland_module
-import realtyprice_module
-import rtech_module
-import wetax_module
+import etax 
+import hometax
+import kbland
+import realtyprice
+import rtech
+import wetax
 
+def main():
+    print("etax 실행 중...")
+    try:
+        etax.main()  # etax 모듈의 main 함수 호출
+        print("etax 실행 완료.")
+    except Exception as e:
+        print(f"etax 실행 중 오류 발생: {e}")
 
-MAX_RETRIES = 3
-attempt = 0
-driver = None  # 드라이버를 루프 외부에서 선언
+    # 다른 모듈도 동일한 방식으로 호출
+    print("hometax 실행 중...")
+    try:
+        hometax.some_function()  # 실제 함수 이름으로 수정
+        print("hometax 실행 완료.")
+    except Exception as e:
+        print(f"hometax 실행 중 오류 발생: {e}")
 
-try:
-    while attempt < MAX_RETRIES:
-        driver = common_module.initialize_driver()
-        try:
-            
-            break  # 성공하면 반복 종료
+    print("kbland 실행 중...")
+    try:
+        kbland.some_function()  # 실제 함수 이름으로 수정
+        print("kbland 실행 완료.")
+    except Exception as e:
+        print(f"kbland 실행 중 오류 발생: {e}")
 
-        except TimeoutException as e:
-            print(f"타임아웃 발생: {e}, 재시도 중...")
-            attempt += 1
-            driver.quit()  # 타임아웃 발생 시 드라이버 종료 후 새로 시도
-    else:
-        # MAX_RETRIES에 도달한 경우
-        print("최대 재시도 횟수에 도달했습니다. 프로그램 종료.")
+    print("realtyprice 실행 중...")
+    try:
+        realtyprice.some_function()  # 실제 함수 이름으로 수정
+        print("realtyprice 실행 완료.")
+    except Exception as e:
+        print(f"realtyprice 실행 중 오류 발생: {e}")
 
-finally:
-    if driver:
-        driver.quit()  # 드라이버가 존재하면 종료
-    print("프로그램 종료.")
+    print("rtech 실행 중...")
+    try:
+        rtech.some_function()  # 실제 함수 이름으로 수정
+        print("rtech 실행 완료.")
+    except Exception as e:
+        print(f"rtech 실행 중 오류 발생: {e}")
+
+    print("wetax 실행 중...")
+    try:
+        wetax.some_function()  # 실제 함수 이름으로 수정
+        print("wetax 실행 완료.")
+    except Exception as e:
+        print(f"wetax 실행 중 오류 발생: {e}")
+
+if __name__ == "__main__":
+    main()

@@ -24,7 +24,7 @@ def KBland_streetnum(driver):
     WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.TAG_NAME, "body"))
     )
-
+    
     # 1. input이 포함된 div 요소 기다리기
     input_div = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, ".homeSerchBox"))
@@ -116,7 +116,7 @@ def KBland_streetnum(driver):
 
         except Exception as e:
             print(f"면적 선택 작업 중 오류 발생: {e}")
-            return 0, 0
+            return None
 
     try:
         # 검색 결과 대기
@@ -157,7 +157,7 @@ def KBland_streetnum(driver):
 
     except Exception as e:
         print(f"항목을 찾지 못했습니다. {e}")
-        return 0, 0
+        return None
 
 
 # 도로명 주소 검색
@@ -269,7 +269,7 @@ def KBland_roadnum(driver):
 
         except Exception as e:
             print(f"면적 선택 작업 중 오류 발생: {e}")
-            return 0, 0
+            return None
 
     try:
         # 검색 결과 대기
@@ -284,7 +284,7 @@ def KBland_roadnum(driver):
         if driver.find_elements(By.CSS_SELECTOR, ".nodata"):
             nodata_message = driver.find_element(By.CSS_SELECTOR, ".nodata").text.strip()
             print(f"검색 결과가 없습니다: {nodata_message}")
-            return 0, 0
+            return None
 
         # 검색 결과가 존재하는 경우 처리
         items = driver.find_elements(By.CSS_SELECTOR, ".item-search-poi")
@@ -311,8 +311,8 @@ def KBland_roadnum(driver):
             # 리스트를 모두 확인했지만 item_name을 찾지 못한 경우
             if not found_item:
                 print(f"'{item_name}' 항목을 찾지 못했습니다. 프로그램을 종료합니다.")
-                return 0, 0  # 프로그램 종료
+                return None  # 프로그램 종료
 
     except Exception as e:
         print(f"항목을 찾지 못했습니다. {e}")
-        return 0, 0
+        return None
