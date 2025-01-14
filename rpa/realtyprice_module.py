@@ -186,7 +186,28 @@ def realtyprice_apt_streetnum(driver, **kwargs):
     # 쉼표 제거 및 숫자로 변환
     realty_value = int(raw_text.replace(",", ""))
     print(f"Numeric value: {realty_value}")  # 출력: 211000000
-    return realty_value
+
+    # 전용면적 값
+    element_1 = WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "#dataList tr:first-child td:nth-child(5)"))
+    )
+    
+    # 값 추출 및 공백 제거
+    element_1_text = element_1.text.strip()
+    print(f"element_1_text: {element_1_text}") 
+    
+    # 쉼표 제거 및 숫자로 변환
+    area_value = float(element_1_text.replace(",", ""))
+    print(f"area_value: {area_value}") 
+
+    # 기준일 값
+    date_element = WebDriverWait(driver, 20).until(
+    EC.visibility_of_element_located((By.XPATH, "//tbody[@id='dataList']/tr[1]/td[1]"))
+    )
+
+    date_value = date_element.text
+
+    return [realty_value, 0, area_value]
 
 def realtyprice_apt_roadnum(driver, **kwargs):
     # 주소 값 가져오기
@@ -341,7 +362,27 @@ def realtyprice_apt_roadnum(driver, **kwargs):
     realty_value = int(raw_text.replace(",", ""))
     print(f"Numeric value: {realty_value}")  # 출력: 211000000
 
-    return realty_value 
+    # 전용면적 값
+    element_1 = WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "#dataList tr:first-child td:nth-child(5)"))
+    )
+    
+    # 값 추출 및 공백 제거
+    element_1_text = element_1.text.strip()
+    print(f"element_1_text: {element_1_text}") 
+    
+    # 쉼표 제거 및 숫자로 변환
+    area_value = float(element_1_text.replace(",", ""))
+    print(f"area_value: {area_value}") 
+
+    # 기준일 값
+    date_element = WebDriverWait(driver, 20).until(
+    EC.visibility_of_element_located((By.XPATH, "//tbody[@id='dataList']/tr[1]/td[1]"))
+    )
+
+    date_value = date_element.text
+
+    return [realty_value, 0, area_value]
 
 
 def realtyprice_individual_streetnum(driver, **kwargs):
@@ -473,7 +514,20 @@ def realtyprice_individual_streetnum(driver, **kwargs):
     realty_value = int(raw_text.replace(",", ""))
     print(f"Numeric value: {realty_value}")  # 예: 811000000
     
-    return realty_value 
+    # 대지면적(산정정)
+    area_element = WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.XPATH, "//tbody[@id='dataList']/tr/td[4]"))
+    )
+    area_value = area_element.text.strip()
+
+    # 기준일 값
+    date_element = WebDriverWait(driver, 20).until(
+    EC.visibility_of_element_located((By.XPATH, "//tbody[@id='dataList']/tr[1]/td[1]"))
+    )
+
+    date_value = date_element.text
+
+    return [realty_value, 0, area_value]
 
 
 def realtyprice_individual_roadnum(driver, **kwargs):
@@ -616,7 +670,20 @@ def realtyprice_individual_roadnum(driver, **kwargs):
     realty_value = int(raw_text.replace(",", ""))
     print(f"Numeric value: {realty_value}")  # 예: 811000000
     
-    return realty_value
+    # 대지면적(산정정)
+    area_element = WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.XPATH, "//tbody[@id='dataList']/tr/td[4]"))
+    )
+    area_value = area_element.text.strip()
+
+    # 기준일 값
+    date_element = WebDriverWait(driver, 20).until(
+    EC.visibility_of_element_located((By.XPATH, "//tbody[@id='dataList']/tr[1]/td[1]"))
+    )
+    date_value = date_element.text
+    
+    return [realty_value, 0, area_value]
+
 
 def realtyprice_land_streetnum(driver, **kwargs):
     # 주소 값 가져오기
@@ -749,7 +816,7 @@ def realtyprice_land_streetnum(driver, **kwargs):
     realty_land_value = int(raw_text.replace(",", "").split(" ")[0])  # 쉼표 제거 후 '원/㎡' 분리
     print(f"Numeric value: {realty_land_value}")  # 출력: 4218000
     
-    return realty_land_value
+    return [realty_land_value, 0, 0]
 
 def realtyprice_land_roadnum(driver, **kwargs):
     # 주소 값 가져오기
@@ -887,5 +954,5 @@ def realtyprice_land_roadnum(driver, **kwargs):
     realty_land_value = int(raw_text.replace(",", "").split(" ")[0])  # 쉼표 제거 후 '원/㎡' 분리
     print(f"Numeric value: {realty_land_value}")  # 출력: 4218000
     
-    return realty_land_value
+    return [realty_land_value, 0, 0]
 

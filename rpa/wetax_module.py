@@ -108,7 +108,7 @@ def wetax_officetel(driver, **kwargs):
 
     time.sleep(3)
 
-    # <td> 또는 <span> 요소 찾기
+    # 건물시가표준액 요소 찾기
     span_element = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//td[@class='a-r']/span[@class='roboto']"))
     )
@@ -120,6 +120,6 @@ def wetax_officetel(driver, **kwargs):
     wetax_value = int(raw_text.replace(",", ""))
     print(f"Numeric value: {wetax_value}")  # 출력: 82198449
     
-    return wetax_value 
+    return [wetax_value, 0, 0]
 
 

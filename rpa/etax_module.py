@@ -140,7 +140,7 @@ def etax_officetel(driver, **kwargs):
 
     time.sleep(3)
 
-    # XPath로 "69,767,826 원" 값이 있는 <td> 요소 찾기
+    # 건물시가표준액 요소 찾기
     td_element = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//tr/td[@class='right' and not(contains(@class, 'last'))]"))
     )
@@ -152,7 +152,7 @@ def etax_officetel(driver, **kwargs):
     etax_value = int(raw_text.replace(",", "").replace(" 원", ""))
     print(f"Numeric value: {etax_value}")  # 출력: 69767826
     
-    return etax_value
+    return [etax_value, 0, 0]
 
 
 

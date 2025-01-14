@@ -302,8 +302,45 @@ def captcha_APP(driver, **kwargs):
     confirm_button.click()
     time.sleep(5)
 
+    # 캡챠 틀렸을 경우 다시 새로고침 후 시도
+    # while True:
+    #     try:
+    #         alert = WebDriverWait(driver, 5).until(EC.alert_is_present())
+    #         if alert:
+    #             print("캡차 오류 발생. 새로고침합니다.")
+    #             alert.accept()
+    #             button = WebDriverWait(driver, 20).until(
+    #                 EC.element_to_be_clickable((By.CSS_SELECTOR, "button[onclick='javascript:captchaReload()']"))
+    #             )
+    #             button.click()
+
+    #             # 새로고침 후 새로운 캡차 이미지가 로드될 때까지 대기
+    #             time.sleep(5)
+                
+    #             # 캡차 이미지 다운로드 및 입력 재시도
+    #             png = driver.get_screenshot_as_png()
+    #             im = Image.open(BytesIO(png))
+    #             im.save(captcha_filename)
+
+    #             captcha_input = WebDriverWait(driver, 20).until(
+    #                 EC.element_to_be_clickable((By.ID, "capcha"))
+    #             )
+    #             captcha_input.clear()
+    #             captcha_input.send_keys(predict_sh.get_predictions())
+
+    #             # 확인버튼 클릭
+    #             confirm_button = WebDriverWait(driver, 20).until(
+    #                 EC.element_to_be_clickable((By.XPATH, "//button[@onclick='javascript:search_dongho_price()']"))
+    #             )
+    #             confirm_button.click()
+    #             time.sleep(5)
+    #     except TimeoutException:
+    #         print("Alert did not appear. 캡차가 맞았거나 다른 문제가 발생했습니다.")
+    #         break
+
+
     # 하한평균가
-    element_low = WebDriverWait(driver, 20).until(
+    element_low = WebDriverWait(drjjiver, 20).until(
         EC.visibility_of_element_located((By.ID, "lower_trade_amt"))
     )
     # 텍스트 값 가져오기
@@ -313,6 +350,7 @@ def captcha_APP(driver, **kwargs):
     rtechApp_low_value = int(raw_element_low.replace(",", ""))
     print(f"Numeric value: {rtechApp_low_value}")
 
-    return rtechApp_low_value
+
+    return [0, rtechApp_low_value, 0]
     
    

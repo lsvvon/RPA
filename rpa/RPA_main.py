@@ -43,6 +43,7 @@ elements_to_find = [
     (By.ID, "Doro_Name1", "Doro_Name1"),
     (By.ID, "Chosung1", "Chosung1"),
     (By.ID, "Build_Area1", "Build_Area1"),
+    (By.ID, "Floor1", "Floor1"),
     (By.ID, "Ticker", "Ticker"),
     (By.ID, "Ticker2", "Ticker2"),
     (By.ID, "Ticker3", "Ticker3"),
@@ -70,7 +71,7 @@ for by, value, description in elements_to_find:
         print(f"{description} 요소를 찾을 수 없습니다:", e)
         collected_data[description] = "오류 발생"
 
-print(collected_data)
+# print(collected_data)
 
 # ticker와 addResch를 순서대로 매핑하여 데이터 수집
 tickers = ["Ticker", "Ticker2", "Ticker3", "Ticker4", "Ticker5"]
@@ -89,12 +90,7 @@ for ticker_key, add_resch_key in zip(tickers, add_reschs):
         data.append(entry)
 
 # 확인용 출력
-print(data)
-
-#response_code = ""
-#response_msg = ""
-#realty_value = None  # realty_value 초기화
-
+# print(data)
 
 # 실행 가능한 모듈과 해당 메인 함수의 매핑
 module_mapping = {
@@ -109,8 +105,43 @@ module_mapping = {
     "Rtech2": lambda Search_Gubun, **kwargs: Rtech2.main(Search_Gubun, **kwargs),  
 }
 
+def data_insert(result, i):
+    if i == 1:
+        i = ''
+
+    if result:
+        response_code_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "Response_Code" + str(i)))
+        )
+        response_code_input.send_keys(result['response_code'])
+
+        response_msg_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "Response_Msg" + str(i)))
+        )
+        response_msg_input.send_keys(result['response_msg'])
+
+        Price_High = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "Price_High" + str(i)))
+        )
+        Price_High.send_keys(result['realty_value'][0])
+
+        Price_Low = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "Price_Low" + str(i)))
+        )
+        Price_Low.send_keys(result['realty_value'][1])
+        
+        Build_Area = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "Build_Area" + str(i)))
+        )
+        Build_Area.send_keys(result['realty_value'][2])
+
+    else:
+        print("Realty1.main 결과를 사용할 수 없습니다.")
+
 
 def main(data):
+    result = None
+    i = 1
     # 데이터를 Ticker 순서대로 처리
     for entry in data:
         ticker = entry["Ticker"]
@@ -118,47 +149,39 @@ def main(data):
         Search_Gubun = entry["Search_Gubun"]
         Estate_Gubun = entry["Estate_Gubun"]
         print(f"{ticker} 실행 중...")
+        
         try:
             if ticker in module_mapping:
                 if ticker == "Rtech1":
                     # Search_Gubun과 addResch는 entry에 포함되었으므로 빼고 전달
-                    module_mapping[ticker](
+                    result = module_mapping[ticker](
                         addResch=addResch,
                         Search_Gubun=Search_Gubun,
                         Estate_Gubun=Estate_Gubun,
                         **{key: value for key, value in collected_data.items() if key not in ["Search_Gubun", "addResch"]}
-                    )
+                    )                    
                 elif ticker == "Etax" or ticker == "Wetax":
-                    module_mapping[ticker](
+                    result = module_mapping[ticker](
                         **{key: value for key, value in collected_data.items()}
-                    )
+                    )                    
                 else:
-                    # Search_Gubun은 entry에 포함되었으므로 빼고 전달
-                    module_mapping[ticker](
+                    result = module_mapping[ticker](
                         Search_Gubun=Search_Gubun,
                         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
                     )
+
+                # 화면값 세팅값    
+                data_insert(result, i)
                 print(f"{ticker} 실행 완료.")
             else:
-                print(f"{ticker}는 지원되지 않는 모듈입니다.")
+                result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
+                result['response_code'] = '90000000'
         except Exception as e:
-            print(f"{ticker} 실행 중 오류 발생: {e}")
+            result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
+            result['response_code'] = '90000000'
+
+        i += 1
 
 if __name__ == "__main__":
     main(data)
-
     
-    response_code_input = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "Response_Code"))
-    )
-    response_code_input.send_keys(Realty1.response_code)
-
-    response_msg_input = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "Response_Msg"))
-    )
-    response_msg_input.send_keys(Realty1.response_msg)
-
-    realty_price_input = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "Price_High"))
-    )
-    realty_price_input.send_keys(Realty1.realty_value)

@@ -308,7 +308,7 @@ def captcha_HUG(driver, Estate_Gobun):
                 rtech_high_value = int(raw_element_high.replace(",", ""))
                 print(f"Numeric value: {rtech_high_value}")
 
-                return rtech_low_value, rtech_high_value
+                return [rtech_high_value, rtech_low_value, 0]
                 
         except TimeoutException:
             print("Alert did not appear.")
@@ -334,7 +334,7 @@ def captcha_HUG(driver, Estate_Gobun):
         rtech_high_value = int(raw_element_high.replace(",", ""))
         print(f"Numeric value: {rtech_high_value}")
 
-        return rtech_low_value, rtech_high_value
+        return [rtech_high_value, rtech_low_value, 0]
     
     # 물건지 정보가 오피스텔일 경우
     elif Estate_Gobun == '4':
@@ -422,7 +422,7 @@ def captcha_HUG(driver, Estate_Gobun):
                 rtech_high_value = int(raw_element_high.replace(",", ""))
                 print(f"Numeric value: {rtech_high_value}")
 
-                return rtech_low_value
+                return [0, rtech_low_value, 0]
                 
         except TimeoutException:
             print("Alert did not appear.")
@@ -440,7 +440,7 @@ def captcha_HUG(driver, Estate_Gobun):
         rtech_low_value = int(raw_element_low.replace(",", ""))
         print(f"Numeric value: {rtech_low_value}")
 
-        return rtech_low_value
+        return [0, rtech_low_value, 0]
 
 def search_HF(driver):
     # 팝업창 확인 후 처리
@@ -476,5 +476,5 @@ def search_HF(driver):
     print(f"Numeric value: {rtech_high_value}")
 
 
-    return rtech_low_value, rtech_high_value
+    return [rtech_high_value, rtech_low_value, 0]
    
