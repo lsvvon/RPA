@@ -8,7 +8,22 @@ from selenium.webdriver.chrome.options import Options
 import time
 import os
 from selenium.common.exceptions import TimeoutException
-def wetax_officetel(driver):
+
+
+def wetax_officetel(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://www.wetax.go.kr/tcp/loi/J030401M01.do"
     driver.get(url)
 
@@ -40,17 +55,17 @@ def wetax_officetel(driver):
     # 관할 자치단체 선택
     ctpv_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "ctpvCd")))
     select = Select(ctpv_cd)
-    select.select_by_visible_text("경상남도")
+    select.select_by_visible_text(Sido)
     time.sleep(3)
 
     sgg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "sggCd")))
     select = Select(sgg_cd)
-    select.select_by_visible_text("김해시")
+    select.select_by_visible_text(Sigungu)
     time.sleep(3)
 
     stdg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "stdgCd")))
     select = Select(stdg_cd)
-    select.select_by_visible_text("내동")
+    select.select_by_visible_text(Ridong)
     time.sleep(3)
 
     # 기준연도 선택
@@ -65,25 +80,25 @@ def wetax_officetel(driver):
 
     # 본번지 입력
     txt_exst_prlno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "txtExstPrlno")))
-    txt_exst_prlno.send_keys("1136")
+    txt_exst_prlno.send_keys(Jibun_No1)
     txt_exst_prlno.send_keys(Keys.ENTER)
     time.sleep(3)
 
     # 부번지 입력
     bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bsno")))
-    bsno.send_keys("4")
+    bsno.send_keys(Jibun_No2)
     bsno.send_keys(Keys.ENTER)
     time.sleep(3)
 
     # 건물 동 입력
     bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bldgDaddr")))
-    bsno.send_keys("")
+    bsno.send_keys(Building_No1)
     bsno.send_keys(Keys.ENTER)
     time.sleep(3)
 
     # 건물 호 입력
     bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bldgHoadr")))
-    bsno.send_keys("1301")
+    bsno.send_keys(Room_No)
     bsno.send_keys(Keys.ENTER)
     time.sleep(3)
 
@@ -102,9 +117,9 @@ def wetax_officetel(driver):
     raw_text = span_element.text.strip()  # 예: '82,198,449'
 
     # 쉼표 제거 및 숫자로 변환
-    numeric_value = int(raw_text.replace(",", ""))
-    print(f"Numeric value: {numeric_value}")  # 출력: 82198449
+    wetax_value = int(raw_text.replace(",", ""))
+    print(f"Numeric value: {wetax_value}")  # 출력: 82198449
     
-    return numeric_value 
+    return wetax_value 
 
 

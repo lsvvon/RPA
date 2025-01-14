@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import time
@@ -9,7 +10,20 @@ import ssl
 # SSL 인증서 검증 무시 설정
 ssl._create_default_https_context = ssl._create_unverified_context
 
-def hometax_streetnum(driver):
+def hometax_streetnum(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://hometax.go.kr/websquare/websquare.html?w2xPath=/ui/pp/index_pp.xml&menuCd=index2"
     driver.get(url)
 
@@ -41,15 +55,17 @@ def hometax_streetnum(driver):
         EC.visibility_of_element_located((By.CLASS_NAME, "w2input"))
     )
     search_input.click()
-    search_input.send_keys("기준시가")
-    time.sleep(5)
+    search_input.send_keys("기준시가조회")
+    time.sleep(1)
+    search_input.send_keys(Keys.RETURN)  # 엔터 키 입력
     
     # 오피스텔 및 상업용 건물 클릭
     office_building = WebDriverWait(driver, 20).until(
-        EC.visibility_of_element_located((By.XPATH, "//span[text()='오피스텔 및 상업용 건물']"))
+        EC.element_to_be_clickable((By.XPATH, "//span[@id='mf_txppWframe_menu_gen_0_tbx_content' and contains(@class, 'w2textbox')]"))
     )
-    driver.execute_script("arguments[0].click();", office_building)
+    office_building.click() 
     time.sleep(5)
+
     # 법정동검색 클릭
     txppWframe_button = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.ID, "mf_txppWframe_btnLdCdPop"))
@@ -61,7 +77,7 @@ def hometax_streetnum(driver):
     input_element = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.ID, "mf_txppWframe_UTECMAAA08_wframe_inputSchNm"))
     )
-    input_element.send_keys("독산동")
+    input_element.send_keys(Ridong)
     time.sleep(3)
 
     # 조회 클릭
@@ -71,15 +87,14 @@ def hometax_streetnum(driver):
     driver.execute_script("arguments[0].click();", select_button)
     time.sleep(3)
 
-    # 선택 클릭
-    # 모든 행을 가져옵니다.
+    # 모든 행을 가져오기
     rows = WebDriverWait(driver, 20).until(
         EC.presence_of_all_elements_located((By.XPATH, '//table//tr'))
     )
     for row in rows:
         try:
             # 각 행에서 "구" 텍스트를 찾기
-            if "금천구" in row.text:
+            if Sigungu in row.text:
                 # 해당 행의 "선택" 버튼 클릭
                 select_button = row.find_element(By.XPATH, './/button[@title="선택"]')
                 select_button.click()
@@ -93,13 +108,13 @@ def hometax_streetnum(driver):
     mf_txppWframe_txtBunj = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.ID, "mf_txppWframe_txtBunj"))
     )
-    mf_txppWframe_txtBunj.send_keys("301")
+    mf_txppWframe_txtBunj.send_keys(Jibun_No1)
 
     # 번지/호 입력
     mf_txppWframe_txtHo = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.ID, "mf_txppWframe_txtHo"))
     )
-    mf_txppWframe_txtHo.send_keys("23")
+    mf_txppWframe_txtHo.send_keys(Jibun_No2)
     time.sleep(3)
 
     # 검색버튼 클릭
@@ -108,8 +123,6 @@ def hometax_streetnum(driver):
     )
     driver.execute_script("arguments[0].click();", select_button2)
     time.sleep(5)
-
-    target_text = '미림A클래스'
 
     # 해당 물건지 찾기
     try:
@@ -125,36 +138,49 @@ def hometax_streetnum(driver):
             item_text = item.text.strip()
             print(f"찾은 항목 텍스트: {item_text}")
 
-            if target_text in item_text:
-                print(f"목표 항목 '{target_text}'를 찾았습니다. 클릭합니다.")
+            if Building_Name in item_text:
+                print(f"목표 항목 '{Building_Name}'를 찾았습니다. 클릭합니다.")
                 driver.execute_script("arguments[0].scrollIntoView();", item)
                 item.click()
                 break
 
-            print(f"목표 항목 '{target_text}'를 찾지 못했습니다.")
+            print(f"목표 항목 '{Building_Name}'를 찾지 못했습니다.")
 
     except Exception as e:
         print(f"에러 발생: {e}")
         return False
 
     # 상세주소 검색
+    # 동
     select_dong = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldComp'))
+    EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldComp'))
     )
     select = Select(select_dong)
-    select.select_by_index(1)
-    
+    if not Building_No1 or Building_No1.strip() == "": # Building_No1이 빈값인지 확인
+        # 첫 번째 옵션 선택
+        select.select_by_index(0)
+        print("Building_No1이 빈값이므로 첫 번째 옵션을 선택했습니다.")
+    else:
+        # Building_No1 값으로 선택
+        try:
+            select.select_by_visible_text(Building_No1)
+            print(f"'{Building_No1}' 값으로 선택했습니다.")
+        except Exception as e:
+            print(f"'{Building_No1}' 값으로 선택하는 데 실패했습니다: {e}")
+
+    # 층
     select_floor = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldFlor'))
     )
     select_1 = Select(select_floor)
-    select_1.select_by_index(11)
+    select_1.select_by_visible_text(Building_No1)
 
+    # 호
     select_ho = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldHo'))
     )
     select_2 = Select(select_ho)
-    select_2.select_by_index(1)
+    select_2.select_by_visible_text(Room_No)
 
     # 검색버튼 클릭
     mf_txppWframe_btnSchTsv= WebDriverWait(driver, 20).until(
@@ -168,21 +194,34 @@ def hometax_streetnum(driver):
         EC.visibility_of_element_located((By.XPATH, "//td[@data-col_id='notcPrc']/nobr"))
     )
     raw_price = price_element.text.strip()  # '4,761,000'
-    price_value = int(raw_price.replace(",", ""))  # 쉼표 제거 후 숫자로 변환
+    hometax_price_value = int(raw_price.replace(",", ""))  # 쉼표 제거 후 숫자로 변환
 
     # 2. 두 번째 값 (36.4)
     size_element = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//td[@data-col_id='bldTotaSfl']/nobr"))
     )
     raw_size = size_element.text.strip()  # '36.4'
-    size_value = float(raw_size)  # 실수로 변환
+    hometax_size_value = float(raw_size)  # 실수로 변환
 
-    print(f"Price: {price_value}, Size: {size_value}")
+    print(f"Price: {hometax_price_value}, Size: {hometax_size_value}")
 
-    return price_value, size_value
+    return hometax_price_value, hometax_size_value
 
 
-def hometax_roadnum(driver):
+def hometax_roadnum(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://hometax.go.kr/websquare/websquare.html?w2xPath=/ui/pp/index_pp.xml&menuCd=index2"
     driver.get(url)
 
@@ -213,14 +252,15 @@ def hometax_roadnum(driver):
         EC.visibility_of_element_located((By.CLASS_NAME, "w2input"))
     )
     search_input.click()
-    search_input.send_keys("기준시가")
-    time.sleep(5)
+    search_input.send_keys("기준시가조회")
+    time.sleep(1)
+    search_input.send_keys(Keys.RETURN)  # 엔터 키 입력
     
     # 오피스텔 및 상업용 건물 클릭
     office_building = WebDriverWait(driver, 20).until(
-        EC.visibility_of_element_located((By.XPATH, "//span[text()='오피스텔 및 상업용 건물']"))
+        EC.element_to_be_clickable((By.XPATH, "//span[@id='mf_txppWframe_menu_gen_0_tbx_content' and contains(@class, 'w2textbox')]"))
     )
-    driver.execute_script("arguments[0].click();", office_building)
+    office_building.click() 
     time.sleep(5)
 
     # 도로명주소로 조회 클릭
@@ -245,7 +285,6 @@ def hometax_roadnum(driver):
     driver.execute_script("arguments[0].click();", mf_txppWframe_btnSchRoadNm)
     time.sleep(5)
 
-    target_text = '서울특별시 영등포구 당산동1가 문래북로'
     # 해당 물건지 찾기
     try:
         # 모든 표시된 `txtRdNmItm0` 요소 찾기
@@ -260,13 +299,13 @@ def hometax_roadnum(driver):
             item_text = item.text.strip()
             print(f"찾은 항목 텍스트: {item_text}")
 
-            if target_text in item_text:
-                print(f"목표 항목 '{target_text}'를 찾았습니다. 클릭합니다.")
+            if Doro_Name in item_text:
+                print(f"목표 항목 '{Doro_Name}'를 찾았습니다. 클릭합니다.")
                 driver.execute_script("arguments[0].scrollIntoView();", item)
                 item.click()
                 break
 
-            print(f"목표 항목 '{target_text}'를 찾지 못했습니다.")
+            print(f"목표 항목 '{Doro_Name}'를 찾지 못했습니다.")
 
     except Exception as e:
         print(f"에러 발생: {e}")
@@ -275,9 +314,6 @@ def hometax_roadnum(driver):
     time.sleep(3)
 
     # 해당 오피스텔 클릭
-    target_text = '디아인스'
-
-    # 해당 물건지 찾기
     try:
         # 모든 표시된 `txtItm` 요소 찾기
         visible_items = WebDriverWait(driver, 20).until(
@@ -291,13 +327,13 @@ def hometax_roadnum(driver):
             item_text = item.text.strip()
             print(f"찾은 항목 텍스트: {item_text}")
 
-            if target_text in item_text:
-                print(f"목표 항목 '{target_text}'를 찾았습니다. 클릭합니다.")
+            if Building_Name in item_text:
+                print(f"목표 항목 '{Building_Name}'를 찾았습니다. 클릭합니다.")
                 driver.execute_script("arguments[0].scrollIntoView();", item)
                 item.click()
                 break
 
-            print(f"목표 항목 '{target_text}'를 찾지 못했습니다.")
+            print(f"목표 항목 '{Building_Name}'를 찾지 못했습니다.")
 
     except Exception as e:
         print(f"에러 발생: {e}")
@@ -305,23 +341,36 @@ def hometax_roadnum(driver):
 
     time.sleep(3)
     # 상세주소 검색
+     # 동
     select_dong = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldComp'))
+    EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldComp'))
     )
     select = Select(select_dong)
-    select.select_by_index(1)
+    if not Building_No1 or Building_No1.strip() == "":  # Building_No1이 빈값인지 확인
+        # 첫 번째 옵션 선택
+        select.select_by_index(0)
+        print("Building_No1이 빈값이므로 첫 번째 옵션을 선택했습니다.")
+    else:
+        # Building_No1 값으로 선택
+        try:
+            select.select_by_visible_text(Building_No1)
+            print(f"'{Building_No1}' 값으로 선택했습니다.")
+        except Exception as e:
+            print(f"'{Building_No1}' 값으로 선택하는 데 실패했습니다: {e}")
     
+    # 층
     select_floor = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldFlor'))
     )
     select_1 = Select(select_floor)
-    select_1.select_by_index(1)
+    select_1.select_by_visible_text(Building_No1)
 
+    # 호
     select_ho = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldHo'))
     )
     select_2 = Select(select_ho)
-    select_2.select_by_index(1)
+    select_2.select_by_visible_text(Room_No)
 
     # 검색버튼 클릭
     mf_txppWframe_btnSchTsv= WebDriverWait(driver, 20).until(
@@ -335,17 +384,17 @@ def hometax_roadnum(driver):
         EC.visibility_of_element_located((By.XPATH, "//td[@data-col_id='notcPrc']/nobr"))
     )
     raw_price = price_element.text.strip()  # '4,761,000'
-    price_value = int(raw_price.replace(",", ""))  # 쉼표 제거 후 숫자로 변환
+    hometax_price_value = int(raw_price.replace(",", ""))  # 쉼표 제거 후 숫자로 변환
 
     # 2. 두 번째 값 (36.4)
     size_element = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//td[@data-col_id='bldTotaSfl']/nobr"))
     )
     raw_size = size_element.text.strip()  # '36.4'
-    size_value = float(raw_size)  # 실수로 변환
+    hometax_size_value = float(raw_size)  # 실수로 변환
 
-    print(f"Price: {price_value}, Size: {size_value}")
+    print(f"Price: {hometax_price_value}, Size: {hometax_size_value}")
     
-    return price_value, size_value
+    return hometax_price_value, hometax_size_value
 
 

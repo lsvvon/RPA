@@ -9,7 +9,20 @@ import predict_sh
 from PIL import Image
 from selenium.common.exceptions import TimeoutException
 
-def rtech_app_streetnum(driver):
+def rtech_app_streetnum(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://www.rtech.or.kr/main/mapSearch_mp.do?popUpYn=&posX=37.48243936583027&posY=127.06183029780048#"
     driver.get(url)
     # 현재 창 정보
@@ -32,28 +45,29 @@ def rtech_app_streetnum(driver):
         EC.element_to_be_clickable((By.NAME, 'do_code1'))
     )
     select = Select(select)
-    select.select_by_visible_text("서울특별시")
+    select.select_by_visible_text(Sido)
 
     # 2. 시군구 선택
     select_1 = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.NAME, 'city_code1'))
     )
     select_1 = Select(select_1)
-    select_1.select_by_visible_text("강남구")
+    select_1.select_by_visible_text(Sigungu)
 
     # 3. 읍면동 선택
     select_2 = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.NAME, 'dong_code1'))
     )
     select_2 = Select(select_2)
-    select_2.select_by_visible_text("개포동")
+    select_2.select_by_visible_text(Ridong)
 
     # 4. 빠른검색 입력
     search_input = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, "searchInput"))
     )
-    search_address = "개포자이르네"
-    search_input.send_keys(search_address)
+    building_name = Building_Name
+    search_address = Sido + " " + Sigungu
+    search_input.send_keys(building_name)
 
     time.sleep(3)
     # 2. 검색 결과 리스트 확인
@@ -77,7 +91,7 @@ def rtech_app_streetnum(driver):
     for item in result_items:
         item_text = item.text.replace(" ", "")  # 공백 제거 후 비교
         # 각 검색어가 항목에 포함되는지 확인
-        if all(keyword in item_text for keyword in search_keywords):
+        if all(keyword in item_text for keyword in search_keywords) and building_name in item_text:
             matching_item = item
             break
 
@@ -103,7 +117,20 @@ def rtech_app_streetnum(driver):
     apt_element.click()
 
 
-def rtech_app_roadnum(driver):
+def rtech_app_roadnum(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://www.rtech.or.kr/main/mapSearch_mp.do?popUpYn=&posX=37.48243936583027&posY=127.06183029780048#"
     driver.get(url)
     # 현재 창 정보
@@ -124,7 +151,7 @@ def rtech_app_roadnum(driver):
     search_input = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, "searchInput"))
     )
-    search_address = "강남구 언주로7길 6"
+    search_address = Doro_Name
     search_input.send_keys(search_address)
 
     time.sleep(3)
@@ -174,7 +201,20 @@ def rtech_app_roadnum(driver):
     driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
     apt_element.click()
 
-def captcha_APP(driver):
+def captcha_APP(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     # 팝업창 확인 후 처리
     if len(driver.window_handles) > 1:
         print("팝업창이 감지되었습니다. 팝업창으로 전환합니다.")
@@ -193,19 +233,27 @@ def captcha_APP(driver):
     )
     driver.execute_script("javascript:infotabChange(2);", ho_background)
 
+    time.sleep(3)
     # 9. 동, 호수 선택
+    # 동
     select_dong = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.NAME, 'dong_'))
     )
     select_dong = Select(select_dong)
-    #select_dong.select_by_visible_text("101")
-    select_dong.select_by_index(1)
+    # Building_No1이 빈값인지 확인
+    if not Building_No1 or Building_No1.strip() == "":
+        print("Building_No1 값이 비어 있습니다. 동명없음 선택")
+        select_dong.select_by_visible_text("동명없음")   # 첫 번째 값 선택
+    else:
+        select_dong.select_by_visible_text(Building_No1) 
+
     time.sleep(2)
+    # 호
     select_ho_element = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'ho_code'))
     )
     select_ho = Select(select_ho_element)
-    select_ho.select_by_index(2)
+    select_ho.select_by_visible_text(Room_No)
     time.sleep(2)
 
     # 10. 보안문자 (캡차 이미지 다운로드)
@@ -262,9 +310,9 @@ def captcha_APP(driver):
     raw_element_low = element_low.text.strip()
     print(f"Raw text: {raw_element_low}")
     # 쉼표 제거 및 숫자로 변환
-    numeric_value_low = int(raw_element_low.replace(",", ""))
-    print(f"Numeric value: {numeric_value_low}")
+    rtechApp_low_value = int(raw_element_low.replace(",", ""))
+    print(f"Numeric value: {rtechApp_low_value}")
 
-    return numeric_value_low
+    return rtechApp_low_value
     
    

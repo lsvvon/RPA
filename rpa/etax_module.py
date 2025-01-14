@@ -7,7 +7,20 @@ from selenium.webdriver.chrome.options import Options
 import time
 from selenium.common.exceptions import TimeoutException
 
-def etax_officetel(driver):
+def etax_officetel(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://etax.seoul.go.kr"
     driver.get(url)
 
@@ -84,13 +97,13 @@ def etax_officetel(driver):
     # 관할구청
     sIGU_CD = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "SIGU_CD")))
     SIGU_CD = Select(sIGU_CD)
-    SIGU_CD.select_by_visible_text("중랑구")
+    SIGU_CD.select_by_visible_text(Sigungu)
     time.sleep(3)
 
     # 법정동
     hDONG = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "HDONG260")))
     HDONG = Select(hDONG)
-    HDONG.select_by_visible_text("신내동")
+    HDONG.select_by_visible_text(Ridong)
     time.sleep(3)
 
     # 특수지
@@ -101,22 +114,22 @@ def etax_officetel(driver):
 
     # 본번지
     bonbun = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bonbun")))
-    bonbun.send_keys("835")
+    bonbun.send_keys(Jibun_No1)
     time.sleep(3)
 
     # 부번지
     bubun = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bubun")))
-    bubun.send_keys("")
+    bubun.send_keys(Jibun_No2)
     time.sleep(3)
 
     # 동
     dong = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "dong")))
-    dong.send_keys("102")
+    dong.send_keys(Building_No1)
     time.sleep(3)
 
     # 호
     hosu = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "hosu")))
-    hosu.send_keys("707")
+    hosu.send_keys(Room_No)
     time.sleep(3)
 
     # 조회 클릭
@@ -136,10 +149,10 @@ def etax_officetel(driver):
     raw_text = td_element.text.strip()  # '69,767,826 원' 형태
     
     # 쉼표와 단위 제거 및 숫자 변환
-    numeric_value = int(raw_text.replace(",", "").replace(" 원", ""))
-    print(f"Numeric value: {numeric_value}")  # 출력: 69767826
+    etax_value = int(raw_text.replace(",", "").replace(" 원", ""))
+    print(f"Numeric value: {etax_value}")  # 출력: 69767826
     
-    return numeric_value
+    return etax_value
 
 
 

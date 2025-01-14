@@ -12,14 +12,18 @@ def initialize_driver():
     options.add_experimental_option('excludeSwitches', ['disable-popup-blocking'])
     return webdriver.Chrome(options=options)
 
-def screenshot_save(driver,site):
+def screenshot_save(driver):
     # 저장할 폴더 경로 지정
-    folder_path = os.path.join(r"C:\python\RPA\rpa\capImg", site)
+    folder_path = os.path.join(r"C:\python\RPA\rpa\capImg")
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
+    unique_number = '5000000000'
     # 파일 경로 설정
-    screenshot_path = os.path.join(folder_path, "full_page_screenshot.png")
+    screenshot_name = f"{unique_number}_901.png"
+    screenshot_path = os.path.join(folder_path, screenshot_name)
+
+    # 전체 페이지 스크린샷 저장
     full_screenshot.capture_full_page(driver, screenshot_path)
     print(f"전체 페이지 스크린샷 저장 완료: {screenshot_path}")
 

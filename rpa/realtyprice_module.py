@@ -7,7 +7,21 @@ from selenium.webdriver.support.select import Select
 from selenium.common.exceptions import TimeoutException
 
 # 공동주택(아파트, 다세대)일 경우 - 지번 검색
-def realtyprice_apt_streetnum(driver):
+def realtyprice_apt_streetnum(driver, **kwargs):
+
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://www.realtyprice.kr/notice/main/mainBody.htm"
     driver.get(url)
 
@@ -70,21 +84,21 @@ def realtyprice_apt_streetnum(driver):
         EC.element_to_be_clickable((By.ID, 'sido_list'))
     )
     select = Select(sido_list)
-    select.select_by_visible_text("서울특별시")
+    select.select_by_visible_text(Sido)
 
     time.sleep(3)
     sgg_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'sgg_list'))
     )
     select_1 = Select(sgg_list)
-    select_1.select_by_visible_text("송파구")
+    select_1.select_by_visible_text(Sigungu)
 
     time.sleep(3)
     eub_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'eub_list'))
     )
     select_2 = Select(eub_list)
-    select_2.select_by_visible_text("가락동")
+    select_2.select_by_visible_text(Ridong)
 
     time.sleep(3)
     
@@ -101,14 +115,14 @@ def realtyprice_apt_streetnum(driver):
         EC.visibility_of_element_located((By.XPATH, "//input[@name='bun1' and @class='text2']"))
     )
     driver.execute_script("arguments[0].click();", bun1)
-    bun1.send_keys("149")
+    bun1.send_keys(Jibun_No1)
 
     time.sleep(3)
     bun2 = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//input[@name='bun2' and @class='text2']"))
     )
     driver.execute_script("arguments[0].click();", bun2)
-    bun2.send_keys("9")
+    bun2.send_keys(Jibun_No2)
 
     time.sleep(3)
     # 검색 클릭            
@@ -123,15 +137,24 @@ def realtyprice_apt_streetnum(driver):
         EC.element_to_be_clickable((By.ID, 'apt'))
     )
     select_3 = Select(apt)
-    select_3.select_by_visible_text("(149-9) 네이처하우스")
+    for option in select_3.options:
+        if Building_Name in option.text:  # Building_Name이 포함된 텍스트를 찾음
+            select_3.select_by_visible_text(option.text)
+            break
 
     time.sleep(3)
+
     # 동 클릭
     dong = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'dong'))
     )
     select_4 = Select(dong)
-    select_4.select_by_visible_text("1")
+    # Building_No1이 빈값인지 확인
+    if not Building_No1 or Building_No1.strip() == "":
+        print("Building_No1 값이 비어 있습니다. 동명없음 선택")
+        select_4.select_by_index(0)  # 첫 번째 값 선택
+    else:
+        select_4.select_by_visible_text(Building_No1) 
 
     time.sleep(3)
     # 호 클릭
@@ -139,7 +162,7 @@ def realtyprice_apt_streetnum(driver):
         EC.element_to_be_clickable((By.ID, 'ho'))
     )
     select_5 = Select(ho)
-    select_5.select_by_visible_text("302")
+    select_5.select_by_visible_text(Room_No)
 
     time.sleep(3)
 
@@ -161,11 +184,24 @@ def realtyprice_apt_streetnum(driver):
     print(f"Raw value: {raw_text}")  # 출력: '211,000,000'
     
     # 쉼표 제거 및 숫자로 변환
-    numeric_value = int(raw_text.replace(",", ""))
-    print(f"Numeric value: {numeric_value}")  # 출력: 211000000
-    return numeric_value
+    realty_value = int(raw_text.replace(",", ""))
+    print(f"Numeric value: {realty_value}")  # 출력: 211000000
+    return realty_value
 
-def realtyprice_apt_roadnum(driver):
+def realtyprice_apt_roadnum(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://www.realtyprice.kr/notice/main/mainBody.htm"
     driver.get(url)
 
@@ -228,28 +264,28 @@ def realtyprice_apt_roadnum(driver):
         EC.element_to_be_clickable((By.ID, 'sido'))
     )
     select = Select(sido_list)
-    select.select_by_visible_text("서울특별시")
+    select.select_by_visible_text(Sido)
 
     time.sleep(3)
     sgg_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'sigungu'))
     )
     select_1 = Select(sgg_list)
-    select_1.select_by_visible_text("송파구")
+    select_1.select_by_visible_text(Sigungu)
 
     time.sleep(3)
     eub_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'initialword'))
     )
     select_2 = Select(eub_list)
-    select_2.select_by_visible_text("ㄷ")
+    select_2.select_by_visible_text(Chosung)
 
     time.sleep(3)
     road_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'road'))
     )
     select_3 = Select(road_list)
-    select_3.select_by_visible_text("도곡로62길")
+    select_3.select_by_visible_text(Doro_Name)
 
     time.sleep(3)
 
@@ -258,7 +294,10 @@ def realtyprice_apt_roadnum(driver):
         EC.element_to_be_clickable((By.ID, 'apt'))
     )
     select_4 = Select(apt)
-    select_4.select_by_visible_text("(304-2) 쉐르빌(304-2)")
+    for option in select_4.options:
+        if Building_Name in option.text:  # Building_Name이 포함된 텍스트를 찾음
+            select_4.select_by_visible_text(option.text)
+            break
     time.sleep(3)
 
     # 동 클릭
@@ -266,15 +305,19 @@ def realtyprice_apt_roadnum(driver):
         EC.element_to_be_clickable((By.ID, 'dong'))
     )
     select_4 = Select(dong)
-    select_4.select_by_visible_text("동명없음")
-
-    time.sleep(3)
+    # Building_No1이 빈값인지 확인
+    if not Building_No1 or Building_No1.strip() == "":
+        print("Building_No1 값이 비어 있습니다. 동명없음 선택")
+        select_4.select_by_index(0)  # 첫 번째 값 선택
+    else:
+        select_4.select_by_visible_text(Building_No1)  # Building_No1 값 선택
+   
     # 호 클릭
     ho = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'ho'))
     )
     select_5 = Select(ho)
-    select_5.select_by_visible_text("201")
+    select_5.select_by_visible_text(Room_No)
 
     time.sleep(3)
 
@@ -295,13 +338,26 @@ def realtyprice_apt_roadnum(driver):
     print(f"Raw value: {raw_text}")  # 출력: '211,000,000'
     
     # 쉼표 제거 및 숫자로 변환
-    numeric_value = int(raw_text.replace(",", ""))
-    print(f"Numeric value: {numeric_value}")  # 출력: 211000000
+    realty_value = int(raw_text.replace(",", ""))
+    print(f"Numeric value: {realty_value}")  # 출력: 211000000
 
-    return numeric_value 
+    return realty_value 
 
 
-def realtyprice_individual_streetnum(driver):
+def realtyprice_individual_streetnum(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://www.realtyprice.kr/notice/main/mainBody.htm"
     driver.get(url)
 
@@ -363,21 +419,21 @@ def realtyprice_individual_streetnum(driver):
         EC.element_to_be_clickable((By.ID, 'sido_list'))
     )
     select = Select(sido_list)
-    select.select_by_visible_text("서울특별시")
+    select.select_by_visible_text(Sido)
 
     time.sleep(3)
     sgg_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'sgg_list'))
     )
     select_1 = Select(sgg_list)
-    select_1.select_by_visible_text("용산구")
+    select_1.select_by_visible_text(Sigungu)
 
     time.sleep(3)
     eub_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'eub_list'))
     )
     select_2 = Select(eub_list)
-    select_2.select_by_visible_text("용문동")
+    select_2.select_by_visible_text(Ridong)
 
     time.sleep(3)
     
@@ -386,14 +442,14 @@ def realtyprice_individual_streetnum(driver):
         EC.visibility_of_element_located((By.XPATH, "//input[@name='bun1' and @class='text3']"))
     )
     driver.execute_script("arguments[0].click();", bun1)
-    bun1.send_keys("38")
+    bun1.send_keys(Jibun_No1)
 
     time.sleep(3)
     bun2 = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//input[@name='bun2' and @class='text3']"))
     )
     driver.execute_script("arguments[0].click();", bun2)
-    bun2.send_keys("65")
+    bun2.send_keys(Jibun_No2)
 
     time.sleep(3)
     # 검색 클릭            
@@ -414,13 +470,26 @@ def realtyprice_individual_streetnum(driver):
     print(f"Raw value: {raw_text}")  # 예: '811,000,000'
     
     # 쉼표 제거 및 숫자로 변환
-    numeric_value = int(raw_text.replace(",", ""))
-    print(f"Numeric value: {numeric_value}")  # 예: 811000000
+    realty_value = int(raw_text.replace(",", ""))
+    print(f"Numeric value: {realty_value}")  # 예: 811000000
     
-    return numeric_value 
+    return realty_value 
 
 
-def realtyprice_individual_roadnum(driver):
+def realtyprice_individual_roadnum(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://www.realtyprice.kr/notice/main/mainBody.htm"
     driver.get(url)
 
@@ -486,28 +555,28 @@ def realtyprice_individual_roadnum(driver):
     )
     select = Select(sido_list)
     #select.select_by_index(1)
-    select.select_by_visible_text("서울특별시")
+    select.select_by_visible_text(Sido)
 
     time.sleep(3)
     sgg_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'sigungu'))
     )
     select_1 = Select(sgg_list)
-    select_1.select_by_visible_text("송파구")
+    select_1.select_by_visible_text(Sigungu)
 
     time.sleep(3)
     eub_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'initialword'))
     )
     select_2 = Select(eub_list)
-    select_2.select_by_visible_text("ㄷ")
+    select_2.select_by_visible_text(Chosung)
 
     time.sleep(3)
     road_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'road'))
     )
     select_3 = Select(road_list)
-    select_3.select_by_visible_text("도곡로62길")
+    select_3.select_by_visible_text(Doro_Name)
 
     time.sleep(3)
 
@@ -516,14 +585,14 @@ def realtyprice_individual_roadnum(driver):
         EC.visibility_of_element_located((By.XPATH, "//input[@name='build_bun1' and @class='text3 input_number_only']"))
     )
     driver.execute_script("arguments[0].click();", bun1)
-    bun1.send_keys("15")
+    bun1.send_keys(Building_No1)
 
     time.sleep(3)
     bun2 = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//input[@name='build_bun2' and @class='text3 input_number_only']"))
     )
     driver.execute_script("arguments[0].click();", bun2)
-    bun2.send_keys("11")
+    bun2.send_keys(Building_No2)
 
     time.sleep(3)
     # 검색 클릭            
@@ -544,12 +613,25 @@ def realtyprice_individual_roadnum(driver):
     print(f"Raw value: {raw_text}")  # 예: '811,000,000'
     
     # 쉼표 제거 및 숫자로 변환
-    numeric_value = int(raw_text.replace(",", ""))
-    print(f"Numeric value: {numeric_value}")  # 예: 811000000
+    realty_value = int(raw_text.replace(",", ""))
+    print(f"Numeric value: {realty_value}")  # 예: 811000000
     
-    return numeric_value
+    return realty_value
 
-def realtyprice_land_streetnum(driver):
+def realtyprice_land_streetnum(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://www.realtyprice.kr/notice/main/mainBody.htm"
     driver.get(url)
 
@@ -611,21 +693,21 @@ def realtyprice_land_streetnum(driver):
         EC.element_to_be_clickable((By.ID, 'sido_list'))
     )
     select = Select(sido_list)
-    select.select_by_visible_text("서울특별시")
+    select.select_by_visible_text(Sido)
 
     time.sleep(3)
     sgg_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'sgg_list'))
     )
     select_1 = Select(sgg_list)
-    select_1.select_by_visible_text("중랑구")
+    select_1.select_by_visible_text(Sigungu)
 
     time.sleep(3)
     eub_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'eub_list'))
     )
     select_2 = Select(eub_list)
-    select_2.select_by_visible_text("신내동")
+    select_2.select_by_visible_text(Ridong)
 
     time.sleep(3)
 
@@ -635,14 +717,14 @@ def realtyprice_land_streetnum(driver):
         EC.visibility_of_element_located((By.XPATH, "//input[@name='bun1' and @class='text3']"))
     )
     driver.execute_script("arguments[0].click();", bun1)
-    bun1.send_keys("835")
+    bun1.send_keys(Jibun_No1)
 
     time.sleep(3)
     bun2 = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//input[@name='bun2' and @class='text3']"))
     )
     driver.execute_script("arguments[0].click();", bun2)
-    bun2.send_keys("")
+    bun2.send_keys(Jibun_No2)
     
     # '검색' 버튼 가져오기
     search_button = WebDriverWait(driver, 20).until(
@@ -664,13 +746,25 @@ def realtyprice_land_streetnum(driver):
     print(f"Raw text: {raw_text}")
     
     # 쉼표와 단위 제거 및 숫자로 변환
-    numeric_value = int(raw_text.replace(",", "").split(" ")[0])  # 쉼표 제거 후 '원/㎡' 분리
-    print(f"Numeric value: {numeric_value}")  # 출력: 4218000
+    realty_land_value = int(raw_text.replace(",", "").split(" ")[0])  # 쉼표 제거 후 '원/㎡' 분리
+    print(f"Numeric value: {realty_land_value}")  # 출력: 4218000
     
-    # 등기부 상 대지권 비율과 곱하여 산정
-    return numeric_value
+    return realty_land_value
 
-def realtyprice_land_roadnum(driver):
+def realtyprice_land_roadnum(driver, **kwargs):
+    # 주소 값 가져오기
+    Sido = kwargs.get('Sido1')
+    Sigungu = kwargs.get('Sigungu1')
+    Ridong = kwargs.get('Ridong1')
+    Jibun_No1 = kwargs.get('Jibun_No1')
+    Jibun_No2 = kwargs.get('Jibun_No2')
+    Building_Name = kwargs.get('Building_Name1')
+    Building_No1 = kwargs.get('Building_No1')
+    Building_No2 = kwargs.get('Building_No2')
+    Room_No = kwargs.get('Room_No1')
+    Doro_Name = kwargs.get('Doro_Name1')
+    Chosung = kwargs.get('Chosung1')
+
     url = "https://www.realtyprice.kr/notice/main/mainBody.htm"
     driver.get(url)
 
@@ -696,10 +790,9 @@ def realtyprice_land_roadnum(driver):
 
     except TimeoutException:
         print("모달 닫기 버튼이 존재하지 않음.")
-        driver.switch_to.default_content()
+        return None
     except Exception as e:
         print(f"모달 닫기 중 예외 발생: {e}")
-        driver.switch_to.default_content()
 
     # 현재 창 정보
     main_window = driver.current_window_handle
@@ -732,28 +825,28 @@ def realtyprice_land_roadnum(driver):
         EC.element_to_be_clickable((By.CLASS_NAME, 'area1'))
     )
     select = Select(sido_list)
-    select.select_by_visible_text("서울특별시")
+    select.select_by_visible_text(Sido)
 
     time.sleep(3)
     sgg_list = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'sigungu'))
     )
     select_1 = Select(sgg_list)
-    select_1.select_by_visible_text("중랑구")
+    select_1.select_by_visible_text(Sigungu)
 
     time.sleep(3)
     initialword = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'initialword'))
     )
     select_2 = Select(initialword)
-    select_2.select_by_visible_text("ㄱ")
+    select_2.select_by_visible_text(Chosung)
 
     time.sleep(3)
     road = WebDriverWait(driver, 20).until(
         EC.element_to_be_clickable((By.ID, 'road'))
     )
     select_3 = Select(road)
-    select_3.select_by_visible_text("겸재로10가길")
+    select_3.select_by_visible_text(Doro_Name)
 
     time.sleep(3)
 
@@ -762,14 +855,14 @@ def realtyprice_land_roadnum(driver):
         EC.visibility_of_element_located((By.XPATH, "//input[@name='build_bun1' and @class='text3 input_number_only']"))
     )
     driver.execute_script("arguments[0].click();", bun1)
-    bun1.send_keys("12")
+    bun1.send_keys(Building_No1)
 
     time.sleep(3)
     bun2 = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.XPATH, "//input[@name='build_bun2' and @class='text3 input_number_only']"))
     )
     driver.execute_script("arguments[0].click();", bun2)
-    bun2.send_keys("")
+    bun2.send_keys(Building_No2)
     
     # '검색' 버튼 가져오기
     search_button = WebDriverWait(driver, 20).until(
@@ -791,9 +884,8 @@ def realtyprice_land_roadnum(driver):
     print(f"Raw text: {raw_text}")
     
     # 쉼표와 단위 제거 및 숫자로 변환
-    numeric_value = int(raw_text.replace(",", "").split(" ")[0])  # 쉼표 제거 후 '원/㎡' 분리
-    print(f"Numeric value: {numeric_value}")  # 출력: 4218000
+    realty_land_value = int(raw_text.replace(",", "").split(" ")[0])  # 쉼표 제거 후 '원/㎡' 분리
+    print(f"Numeric value: {realty_land_value}")  # 출력: 4218000
     
-    # 등기부 상 대지권 비율과 곱하여 산정
-    return numeric_value
+    return realty_land_value
 
