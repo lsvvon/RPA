@@ -11,6 +11,13 @@ from selenium.common.exceptions import TimeoutException
 
 
 def wetax_officetel(driver, **kwargs):
+    # response 초기화
+    response = {
+        "response_code": None,
+        "response_msg": None,
+        "data": None,
+    }
+
     # 주소 값 가져오기
     Sido = kwargs.get('Sido1')
     Sigungu = kwargs.get('Sigungu1')
@@ -41,85 +48,211 @@ def wetax_officetel(driver, **kwargs):
         )
         # 버튼 클릭
         driver.execute_script("arguments[0].click();", close_button)
-        print("팝업 닫기 버튼 클릭 완료.")
         # iframe에서 메인 페이지로 돌아가기
         driver.switch_to.default_content()
     except TimeoutException:
-        print("모달 닫기 버튼이 존재하지 않음.")
-        driver.switch_to.default_content()
+        response["response_code"] = "90000000"
+        response["response_msg"] = "팝업 닫기 버튼이 존재하지 않음."
+        response["data"] = [0, 0, 0, 0]
+        return response
     except Exception as e:
-        print(f"팝업 닫기 버튼 클릭 중 예외 발생: {e}")
-        driver.switch_to.default_content()
-    
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"팝업 닫기 버튼 클릭 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    # 관할 자치단체 선택
-    ctpv_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "ctpvCd")))
-    select = Select(ctpv_cd)
-    select.select_by_visible_text(Sido)
-    time.sleep(3)
+    try:
+        # 관할 자치단체 선택
+        ctpv_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "ctpvCd")))
+        select = Select(ctpv_cd)
+        select.select_by_visible_text(Sido)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "시도 선택 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"시도 선택 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    sgg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "sggCd")))
-    select = Select(sgg_cd)
-    select.select_by_visible_text(Sigungu)
-    time.sleep(3)
+    try:
+        sgg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "sggCd")))
+        select = Select(sgg_cd)
+        select.select_by_visible_text(Sigungu)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "시군구 선택 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"시군구 선택 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    stdg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "stdgCd")))
-    select = Select(stdg_cd)
-    select.select_by_visible_text(Ridong)
-    time.sleep(3)
+    try:
+        stdg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "stdgCd")))
+        select = Select(stdg_cd)
+        select.select_by_visible_text(Ridong)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "읍면동 선택 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"읍면동 선택 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    # 기준연도 선택
-    aplcn_yr = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "aplcnYr")))
-    Select(aplcn_yr).select_by_index(1)
-    time.sleep(3)
+    try:
+        # 기준연도 선택
+        aplcn_yr = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "aplcnYr")))
+        Select(aplcn_yr).select_by_index(1)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "기준연도 선택 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"기준연도 선택 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    # 특수번지 선택
-    srg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "srgCd")))
-    Select(srg_cd).select_by_index(1)
-    time.sleep(3)
+    try:
+        # 특수번지 선택
+        srg_cd = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "srgCd")))
+        Select(srg_cd).select_by_index(1)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "특수번지 선택 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"특수번지 선택 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    # 본번지 입력
-    txt_exst_prlno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "txtExstPrlno")))
-    txt_exst_prlno.send_keys(Jibun_No1)
-    txt_exst_prlno.send_keys(Keys.ENTER)
-    time.sleep(3)
+    try:
+        # 본번지 입력
+        txt_exst_prlno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "txtExstPrlno")))
+        txt_exst_prlno.send_keys(Jibun_No1)
+        txt_exst_prlno.send_keys(Keys.ENTER)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "본번지 입력 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"본번지 입력 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    # 부번지 입력
-    bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bsno")))
-    bsno.send_keys(Jibun_No2)
-    bsno.send_keys(Keys.ENTER)
-    time.sleep(3)
+    try:
+        # 부번지 입력
+        bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bsno")))
+        bsno.send_keys(Jibun_No2)
+        bsno.send_keys(Keys.ENTER)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "부번지 입력 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"부번지 입력 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    # 건물 동 입력
-    bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bldgDaddr")))
-    bsno.send_keys(Building_No1)
-    bsno.send_keys(Keys.ENTER)
-    time.sleep(3)
+    try:
+        # 건물 동 입력
+        bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bldgDaddr")))
+        bsno.send_keys(Building_No1)
+        bsno.send_keys(Keys.ENTER)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "건물 동 입력 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"건물 동 입력 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    # 건물 호 입력
-    bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bldgHoadr")))
-    bsno.send_keys(Room_No)
-    bsno.send_keys(Keys.ENTER)
-    time.sleep(3)
+    try:
+        # 건물 호 입력
+        bsno = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "bldgHoadr")))
+        bsno.send_keys(Room_No)
+        bsno.send_keys(Keys.ENTER)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "건물 호 입력 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"건물 호 입력 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    # 검색 버튼 클릭
-    btn_srch_blds_cpb = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, "btnSrchBldsCpb")))
-    btn_srch_blds_cpb.click()
+    try:
+        # 검색 버튼 클릭
+        btn_srch_blds_cpb = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, "btnSrchBldsCpb")))
+        btn_srch_blds_cpb.click()
 
-    time.sleep(3)
+        time.sleep(3)
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "검색 버튼 클릭 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"검색 버튼 클릭 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
 
-    # 건물시가표준액 요소 찾기
-    span_element = WebDriverWait(driver, 20).until(
-        EC.visibility_of_element_located((By.XPATH, "//td[@class='a-r']/span[@class='roboto']"))
-    )
-    
-    # 텍스트 값 가져오기
-    raw_text = span_element.text.strip()  # 예: '82,198,449'
+    try:
+        # 건물시가표준액 요소 찾기
+        span_element = WebDriverWait(driver, 20).until(
+            EC.visibility_of_element_located((By.XPATH, "//td[@class='a-r']/span[@class='roboto']"))
+        )
+        
+        # 텍스트 값 가져오기
+        raw_text = span_element.text.strip()  # 예: '82,198,449'
 
-    # 쉼표 제거 및 숫자로 변환
-    wetax_value = int(raw_text.replace(",", ""))
-    print(f"Numeric value: {wetax_value}")  # 출력: 82198449
-    
-    return [wetax_value, 0, 0]
+        # 쉼표 제거 및 숫자로 변환
+        wetax_value = int(raw_text.replace(",", ""))
+        
+        response["response_code"] = "00000000"
+        response["response_msg"] = "성공"
+        response["data"] = [wetax_value, 0, 0, 0]
 
+    except TimeoutException:
+        response["response_code"] = "90000000"
+        response["response_msg"] = "건물시가표준액 요소 찾기 중 타임아웃 발생."
+        response["data"] = [0, 0, 0, 0]
+        return response
+    except Exception as e:
+        response["response_code"] = "90000001"
+        response["response_msg"] = f"건물시가표준액 요소 찾기 중 예외 발생: {e}"
+        response["data"] = [0, 0, 0, 0]
+        return response
+
+    return response
 

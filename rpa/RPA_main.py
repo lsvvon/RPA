@@ -49,11 +49,13 @@ elements_to_find = [
     (By.ID, "Ticker3", "Ticker3"),
     (By.ID, "Ticker4", "Ticker4"),
     (By.ID, "Ticker5", "Ticker5"),
+    (By.ID, "Ticker6", "Ticker6"),
     (By.ID, "addResch", "addResch"),
     (By.ID, "addResch2", "addResch2"),
     (By.ID, "addResch3", "addResch3"),
     (By.ID, "addResch4", "addResch4"),
     (By.ID, "addResch5", "addResch5"),
+    (By.ID, "addResch6", "addResch6"),
 ]
 
 # 수집된 데이터 저장
@@ -74,8 +76,8 @@ for by, value, description in elements_to_find:
 # print(collected_data)
 
 # ticker와 addResch를 순서대로 매핑하여 데이터 수집
-tickers = ["Ticker", "Ticker2", "Ticker3", "Ticker4", "Ticker5"]
-add_reschs = ["addResch", "addResch2", "addResch3", "addResch4", "addResch5"]
+tickers = ["Ticker", "Ticker2", "Ticker3", "Ticker4", "Ticker5", "Ticker6"]
+add_reschs = ["addResch", "addResch2", "addResch3", "addResch4", "addResch5", "addResch6"]
 data = []
 
 for ticker_key, add_resch_key in zip(tickers, add_reschs):
@@ -97,18 +99,18 @@ module_mapping = {
     "Etax": lambda **kwargs: Etax.main(**kwargs),
     "Wetax": lambda **kwargs: Wetax.main(**kwargs),
     "Hometax": lambda Search_Gubun, **kwargs: Hometax.main(Search_Gubun, **kwargs),
-    "KBland": lambda Search_Gubun, **kwargs: KBland.main(Search_Gubun, **kwargs),
+    "KBLand": lambda Search_Gubun, **kwargs: KBland.main(Search_Gubun, **kwargs),
     "Realty1": lambda Search_Gubun, **kwargs: Realty1.main(Search_Gubun, **kwargs),
     "Realty2": lambda Search_Gubun, **kwargs: Realty2.main(Search_Gubun, **kwargs),
     "Realty3": lambda Search_Gubun, **kwargs: Realty3.main(Search_Gubun, **kwargs),
-    "Rtech1": lambda addResch, Search_Gubun, Estate_Gubun, **kwargs: Rtech1.main(addResch=addResch, Search_Gubun=Search_Gubun, Estate_Gubun=Estate_Gubun, **kwargs),
+    "Rtech": lambda addResch, Search_Gubun, Estate_Gubun, **kwargs: Rtech1.main(addResch=addResch, Search_Gubun=Search_Gubun, Estate_Gubun=Estate_Gubun, **kwargs),
     "Rtech2": lambda Search_Gubun, **kwargs: Rtech2.main(Search_Gubun, **kwargs),  
 }
 
 def data_insert(result, i):
     if i == 1:
         i = ''
-
+    print("result : ", result)
     if result:
         response_code_input = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "Response_Code" + str(i)))
@@ -123,25 +125,34 @@ def data_insert(result, i):
         Price_High = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "Price_High" + str(i)))
         )
-        Price_High.send_keys(result['realty_value'][0])
-
+        Price_High.send_keys(result['data'][0] if result['data'][0] is not None else '')
+        
         Price_Low = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "Price_Low" + str(i)))
         )
-        Price_Low.send_keys(result['realty_value'][1])
+        Price_Low.send_keys(result['data'][1] if result['data'][1] is not None else '')
         
         Build_Area = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "Build_Area" + str(i)))
         )
-        Build_Area.send_keys(result['realty_value'][2])
+        Build_Area.send_keys(result['data'][2] if result['data'][2] is not None else '')
+
+        Base_Date = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "Base_Date" + str(i)))
+        )
+        Base_Date.send_keys(result['data'][3] if result['data'][3] is not None else '')
 
     else:
-        print("Realty1.main 결과를 사용할 수 없습니다.")
+        print("main data insert 결과를 사용할 수 없습니다.")
 
 
 def main(data):
     result = None
     i = 1
+    KBland_ResCode = ''
+    Rtech_ResCode = ''
+    Etc_ResCode = ''
+
     # 데이터를 Ticker 순서대로 처리
     for entry in data:
         ticker = entry["Ticker"]
@@ -149,10 +160,16 @@ def main(data):
         Search_Gubun = entry["Search_Gubun"]
         Estate_Gubun = entry["Estate_Gubun"]
         print(f"{ticker} 실행 중...")
+
+        # 우선순위 정상처리되면 종료한다.
+        if KBland_ResCode == '00000000' and Rtech_ResCode == '00000000':
+            break
+        if Etc_ResCode == '00000000':     
+            break
         
         try:
             if ticker in module_mapping:
-                if ticker == "Rtech1":
+                if ticker == "Rtech":
                     # Search_Gubun과 addResch는 entry에 포함되었으므로 빼고 전달
                     result = module_mapping[ticker](
                         addResch=addResch,
@@ -160,25 +177,50 @@ def main(data):
                         Estate_Gubun=Estate_Gubun,
                         **{key: value for key, value in collected_data.items() if key not in ["Search_Gubun", "addResch"]}
                     )                    
-                elif ticker == "Etax" or ticker == "Wetax":
+                elif ticker == "Etax1" or ticker == "Wetax1":
                     result = module_mapping[ticker](
                         **{key: value for key, value in collected_data.items()}
-                    )                    
+                    )
+                # elif ticker == "Realty1":
+                #     result = module_mapping[ticker](
+                #         Search_Gubun=Search_Gubun,
+                #         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
+                #     )
+                # elif ticker == "Rtech2":
+                #     result = module_mapping[ticker](
+                #         Search_Gubun=Search_Gubun,
+                #         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
+                #     )                            
                 else:
                     result = module_mapping[ticker](
                         Search_Gubun=Search_Gubun,
                         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
                     )
 
+                # if ticker == 'KBLand':
+                #     KBland_ResCode = result['response_code']
+                # elif ticker == 'Rtech':
+                #     Rtech_ResCode = result['response_code']
+                # else: 
+                #     Etc_ResCode = result['response_code']
+
+                # print(f"{ticker} : response value!!!")    
+                # print("KBland_ResCode:", KBland_ResCode)
+                # print("Rtech_ResCode:", Rtech_ResCode)
+                # print("Etc_ResCode:", Etc_ResCode)
+
                 # 화면값 세팅값    
                 data_insert(result, i)
                 print(f"{ticker} 실행 완료.")
+                
             else:
-                result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
-                result['response_code'] = '90000000'
+                print(f"{ticker} 실행 중 오류 발생")
+                # result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
+                # result['response_code'] = '90000000'
         except Exception as e:
-            result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
-            result['response_code'] = '90000000'
+            print(f"{ticker} 실행 중 오류 발생fdfd: {e}")
+            # result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
+            # result['response_code'] = '90000000'
 
         i += 1
 
