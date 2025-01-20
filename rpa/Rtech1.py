@@ -18,7 +18,7 @@ def main(addResch, Search_Gubun, Estate_Gubun, **kwargs):
 
 
         elif Search_Gubun == '2': # 도로명검색일때
-            response = Rtech1_module.rtech_roadnum(driver, **kwargs)
+            response = Rtech1_module.rtech_roadnum(driver, Estate_Gubun, **kwargs)
             if not response["response_code"]:
                 if addResch == 'HF':
                     response = Rtech1_module.search_HF(driver)

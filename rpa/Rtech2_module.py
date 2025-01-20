@@ -544,7 +544,6 @@ def captcha_APP(driver, **kwargs):
             response["response_code"] = "00000000"
             response["response_msg"] = "성공적으로 하한평균가를 가져왔습니다."
             response["data"] = [0, rtechApp_low_value, 0, 0]
-        
         except Exception as e:
             response["response_code"] = "90000001"
             response["response_msg"] = f"하한평균가 가져오기 중 예외 발생: {e}"

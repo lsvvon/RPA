@@ -4,6 +4,7 @@ import common_module
 
 
 def main(Search_Gobun, **kwargs):
+    driver = None 
     try:
         driver = common_module.initialize_driver()
 
@@ -11,13 +12,12 @@ def main(Search_Gobun, **kwargs):
             response = Rtech2_module.rtech_app_streetnum(driver, **kwargs)
             if not response["response_code"]:
                 response = Rtech2_module.captcha_APP(driver, **kwargs)
-                print("response2", response)
 
         elif Search_Gobun == '2': # 도로명검색일때
             response = Rtech2_module.rtech_app_roadnum(driver, **kwargs)
             if not response["response_code"]:
                 response = Rtech2_module.captcha_APP(driver, **kwargs)
-                print("response2", response)
+
 
         common_module.screenshot_save(driver)
 

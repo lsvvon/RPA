@@ -25,7 +25,7 @@ def rtech_streetnum(driver, Estate_Gubun, **kwargs):
     elif Estate_Gubun == '4':
         Estate_Name = '오피스텔'
         Estate_ch = '오'
-    print("Estate_Name", Estate_Name)
+
     try:
         # 주소 값 가져오기
         Sido = kwargs.get('Sido1')
@@ -167,12 +167,12 @@ def rtech_streetnum(driver, Estate_Gubun, **kwargs):
             apt_element.click()
         except TimeoutException:
             response["response_code"] = "90000000"
-            response["response_msg"] = "아파트 항목 클릭 중 타임아웃 발생."
+            response["response_msg"] = "물건지 항목 클릭 중 타임아웃 발생."
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
             response["response_code"] = "90000001"
-            response["response_msg"] = f"아파트 항목 클릭 중 예외 발생: {e}"
+            response["response_msg"] = f"물건지 항목 클릭 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
                 
@@ -184,12 +184,21 @@ def rtech_streetnum(driver, Estate_Gubun, **kwargs):
     return response
 
 
-def rtech_roadnum(driver, **kwargs): 
+def rtech_roadnum(driver, Estate_Gubun, **kwargs): 
     response = {
         "response_code": None,
         "response_msg": None,
         "data": None,
     }
+
+    if Estate_Gubun == '1':
+        Estate_Name = '아파트'
+        Estate_ch = '아'
+    elif Estate_Gubun == '4':
+        Estate_Name = '오피스텔'
+        Estate_ch = '오'
+
+
     try:
         # 주소 값 가져오기
         Sido = kwargs.get('Sido1')
@@ -269,12 +278,13 @@ def rtech_roadnum(driver, **kwargs):
                     break
             time.sleep(5)
             if matching_item:
-                print(f"일치하는 주소 '{search_address}'를 찾았습니다. 클릭합니다.")
                 driver.execute_script("arguments[0].scrollIntoView(true);", matching_item)
                 matching_item.click()
             else:
-                print(f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다.")
-                return None
+                response["response_code"] = "90000001"
+                response["response_msg"] = f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다."
+                response["data"] = [0, 0, 0, 0]
+                return response
         except Exception as e:
             response["response_code"] = "90000001"
             response["response_msg"] = f"검색 결과 처리 중 예외 발생: {e}"
@@ -282,17 +292,30 @@ def rtech_roadnum(driver, **kwargs):
             return response
         
         time.sleep(3)
-        # 3. 해당 아파트 항목 클릭
-        building_name = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "map_pop_infobox_tit1"))
-        )
-        
-        apt_element = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable((By.XPATH, f"//ul[@id='aptListArea']//li/a[contains(text(), '{building_name.text}')]"))
-        )
-        driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
-        apt_element.click()
 
+        try: 
+            # 3. 해당 아파트 항목 클릭
+            building_name = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "map_pop_infobox_tit1"))
+            )
+            
+            apt_element = WebDriverWait(driver, 20).until(
+                #EC.element_to_be_clickable((By.XPATH, f"//ul[@id='aptListArea']//li/a[contains(text(), '{building_name.text}')]"))
+                (By.XPATH, f"//a[contains(@href, 'go_apt_info') and contains(., '{Estate_ch}') and contains(., '{building_name.text}')]")
+            )
+            driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
+            apt_element.click()
+        except TimeoutException:
+            response["response_code"] = "90000000"
+            response["response_msg"] = "물건지 항목 클릭 중 타임아웃 발생."
+            response["data"] = [0, 0, 0, 0]
+            return response
+        except Exception as e:
+            response["response_code"] = "90000001"
+            response["response_msg"] = f"물건지 항목 클릭 중 예외 발생: {e}"
+            response["data"] = [0, 0, 0, 0]
+            return response
+                
     except Exception as e:
         response["response_code"] = "90000001"
         response["response_msg"] = f"예상치 못한 오류 발생: {e}"

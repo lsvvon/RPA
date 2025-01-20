@@ -183,15 +183,16 @@ def hometax_streetnum(driver, **kwargs):
             # 각 요소의 텍스트 확인
             for item in visible_items:
                 item_text = item.text.strip()
-                print(f"찾은 항목 텍스트: {item_text}")
 
                 if Building_Name in item_text:
                     print(f"목표 항목 '{Building_Name}'를 찾았습니다. 클릭합니다.")
                     driver.execute_script("arguments[0].scrollIntoView();", item)
                     item.click()
                     break
-
-                print(f"목표 항목 '{Building_Name}'를 찾지 못했습니다.")
+                response["response_code"] = "90000001"
+                response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
+                response["data"] = [0, 0, 0, 0]
+                return response 
 
         except Exception as e:
             response["response_code"] = "90000001"
@@ -208,7 +209,6 @@ def hometax_streetnum(driver, **kwargs):
         if not Building_No1 or Building_No1.strip() == "": # Building_No1이 빈값인지 확인
             # 첫 번째 옵션 선택
             select.select_by_index(1)
-            print("Building_No1이 빈값이므로 첫 번째 옵션을 선택했습니다.")
         else:
             # Building_No1 값으로 선택
             try:
@@ -217,6 +217,11 @@ def hometax_streetnum(driver, **kwargs):
                     if Room_No in option.text:
                         select.select_by_visible_text(option.text)
                         break
+                    else:
+                        response["response_code"] = "90000001"
+                        response["response_msg"] = "동 선택하는 데 실패했습니다"
+                        response["data"] = [0, 0, 0, 0]
+                        return response
 
             except Exception as e:
                 response["response_code"] = "90000001"
@@ -243,6 +248,11 @@ def hometax_streetnum(driver, **kwargs):
                 if Room_No in option.text:  # "201"이 포함된 텍스트를 찾아 선택
                     select_2.select_by_visible_text(option.text)
                     break
+                else:
+                    response["response_code"] = "90000001"
+                    response["response_msg"] = "층/호 선택하는 데 실패했습니다"
+                    response["data"] = [0, 0, 0, 0]
+                    return response
         except Exception as e:
             response["response_code"] = "90000001"
             response["response_msg"] = f"층/호 선택하는 데 실패했습니다: {e}"
@@ -421,16 +431,18 @@ def hometax_roadnum(driver, **kwargs):
             # 각 요소의 텍스트 확인
             for item in visible_items:
                 item_text = item.text.strip()
-                print(f"찾은 항목 텍스트: {item_text}")
 
                 if Doro_Name in item_text:
                     print(f"목표 항목 '{Doro_Name}'를 찾았습니다. 클릭합니다.")
                     driver.execute_script("arguments[0].scrollIntoView();", item)
                     item.click()
                     break
-
-                print(f"목표 항목 '{Doro_Name}'를 찾지 못했습니다.")
-
+                
+                response["response_code"] = "90000001"
+                response["response_msg"] = f"목표 항목 '{Doro_Name}'를 찾지 못했습니다."
+                response["data"] = [0, 0, 0, 0]
+                return response 
+            
         except Exception as e:
             response["response_code"] = "90000001"
             response["response_msg"] = "해당 물건지 찾기 오류 발생."
@@ -451,15 +463,16 @@ def hometax_roadnum(driver, **kwargs):
             # 각 요소의 텍스트 확인
             for item in visible_items:
                 item_text = item.text.strip()
-                print(f"찾은 항목 텍스트: {item_text}")
 
                 if Building_Name in item_text:
                     print(f"목표 항목 '{Building_Name}'를 찾았습니다. 클릭합니다.")
                     driver.execute_script("arguments[0].scrollIntoView();", item)
                     item.click()
                     break
-
-                print(f"목표 항목 '{Building_Name}'를 찾지 못했습니다.")
+                response["response_code"] = "90000001"
+                response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
+                response["data"] = [0, 0, 0, 0]
+                return response
 
         except Exception as e:
             response["response_code"] = "90000001"
@@ -477,7 +490,6 @@ def hometax_roadnum(driver, **kwargs):
         if not Building_No1 or Building_No1.strip() == "":  # Building_No1이 빈값인지 확인
             # 첫 번째 옵션 선택
             select.select_by_index(1)
-            print("Building_No1이 빈값이므로 첫 번째 옵션을 선택했습니다.")
         else:
             # Building_No1 값으로 선택
             try:
