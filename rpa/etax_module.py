@@ -53,6 +53,7 @@ def etax_officetel(driver, **kwargs):
             print("모달 닫기 버튼이 존재하지 않음.")
             driver.switch_to.default_content()
         except Exception as e:
+            e = str(e).split("\\n")[0]
             print(f"팝업 닫기 버튼 클릭 중 예외 발생: {e}")
             driver.switch_to.default_content()
 
@@ -123,7 +124,7 @@ def etax_officetel(driver, **kwargs):
             time.sleep(3)
 
             # 법정동
-            hDONG = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "HDONG230")))
+            hDONG = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "HDONG170")))
             HDONG = Select(hDONG)
             HDONG.select_by_visible_text(Ridong)
             time.sleep(3)
@@ -163,6 +164,7 @@ def etax_officetel(driver, **kwargs):
             time.sleep(3)
      
         except NoSuchElementException as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000002"
             response["response_msg"] = f"년도/관할구청/법정동/특수지/번지 요소 찾을 수 없습니다. {e}"
             response["data"] = [0, 0, 0, 0]
@@ -188,6 +190,7 @@ def etax_officetel(driver, **kwargs):
             response["data"] = [etax_value, 0, 0, 0]
 
         except NoSuchElementException as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000002"
             response["response_msg"] = f"건물시가표준액 요소 찾을 수 없습니다. {e}"
             response["data"] = [0, 0, 0, 0]
@@ -199,6 +202,7 @@ def etax_officetel(driver, **kwargs):
             return response 
     
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]

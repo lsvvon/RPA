@@ -30,6 +30,7 @@ def rtech_app_streetnum(driver, **kwargs):
         # 주소 값 가져오기
         Sido = kwargs.get('Sido1')
         Sigungu = kwargs.get('Sigungu1')
+        Sigungu2 = kwargs.get('Sigungu2')
         Ridong = kwargs.get('Ridong1')
         Jibun_No1 = kwargs.get('Jibun_No1')
         Jibun_No2 = kwargs.get('Jibun_No2')
@@ -94,7 +95,7 @@ def rtech_app_streetnum(driver, **kwargs):
                 EC.element_to_be_clickable((By.NAME, 'city_code1'))
             )
             select_1 = Select(select_1)
-            select_1.select_by_visible_text(Sigungu)
+            select_1.select_by_visible_text(Sigungu2)
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "시군구 선택 중 타임아웃 발생."
@@ -120,7 +121,7 @@ def rtech_app_streetnum(driver, **kwargs):
                 EC.element_to_be_clickable((By.ID, "searchInput"))
             )
             building_name = Building_Name
-            search_address = Sido + " " + Sigungu
+            search_address = Sido + " " + Sigungu2
             search_input.send_keys(building_name)
         except TimeoutException:
             response["response_code"] = "90000000"
@@ -153,8 +154,9 @@ def rtech_app_streetnum(driver, **kwargs):
                     response["data"] = [0, 0, 0, 0]
                     return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"검색 결과 처리 중 예외 발생: {e}"
+            response["response_msg"] = f"검색 결과 처리 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
         time.sleep(3)
@@ -178,8 +180,9 @@ def rtech_app_streetnum(driver, **kwargs):
                 response["data"] = [0, 0, 0, 0]
                 return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"항목 선택 중 예외 발생: {e}"
+            response["response_msg"] = f"항목 선택 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -201,14 +204,16 @@ def rtech_app_streetnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"아파트 항목 클릭 중 예외 발생: {e}"
+            response["response_msg"] = f"아파트 항목 클릭 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
     except Exception as e:
+        error = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
-        response["response_msg"] = f"예상치 못한 오류 발생: {e}"
+        response["response_msg"] = f"예상치 못한 오류 발생: {error}"
         response["data"] = [0, 0, 0, 0]
         return response
 
@@ -252,8 +257,9 @@ def rtech_app_roadnum(driver, **kwargs):
                     driver.close()
             driver.switch_to.window(main_window)
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000000"
-            response["response_msg"] = f"팝업 창 닫기 중 예외 발생: {e}"
+            response["response_msg"] = f"팝업 창 닫기 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -269,8 +275,9 @@ def rtech_app_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"팝업 닫기 버튼 클릭 중 예외 발생: {e}"
+            response["response_msg"] = f"팝업 닫기 버튼 클릭 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -287,8 +294,9 @@ def rtech_app_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"검색 입력 중 예외 발생: {e}"
+            response["response_msg"] = f"검색 입력 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -306,8 +314,9 @@ def rtech_app_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"검색 결과 리스트 확인 중 예외 발생: {e}"
+            response["response_msg"] = f"검색 결과 리스트 확인 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -322,8 +331,9 @@ def rtech_app_roadnum(driver, **kwargs):
                     response["data"] = [0, 0, 0, 0]
                     return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"검색 결과 처리 중 예외 발생: {e}"
+            response["response_msg"] = f"검색 결과 처리 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -347,8 +357,9 @@ def rtech_app_roadnum(driver, **kwargs):
                 response["data"] = [0, 0, 0, 0]
                 return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"항목 선택 중 예외 발생: {e}"
+            response["response_msg"] = f"항목 선택 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -370,14 +381,16 @@ def rtech_app_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"아파트 항목 클릭 중 예외 발생: {e}"
+            response["response_msg"] = f"아파트 항목 클릭 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
     except Exception as e:
+        error = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
-        response["response_msg"] = f"예상치 못한 오류 발생: {e}"
+        response["response_msg"] = f"예상치 못한 오류 발생: {error}"
         response["data"] = [0, 0, 0, 0]
         return response
 
@@ -416,8 +429,9 @@ def captcha_APP(driver, **kwargs):
                 response["data"] = [0, 0, 0, 0]
                 return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"팝업창 처리 중 예외 발생: {e}"
+            response["response_msg"] = f"팝업창 처리 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -435,8 +449,9 @@ def captcha_APP(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"호별 시세조회 클릭 중 예외 발생: {e}"
+            response["response_msg"] = f"호별 시세조회 클릭 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -453,8 +468,9 @@ def captcha_APP(driver, **kwargs):
             else:
                 select_dong.select_by_visible_text(Building_No1)
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"동 선택 중 예외 발생: {e}"
+            response["response_msg"] = f"동 선택 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -468,8 +484,9 @@ def captcha_APP(driver, **kwargs):
             select_ho = Select(select_ho_element)
             select_ho.select_by_visible_text(Room_No)
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"호 선택 중 예외 발생: {e}"
+            response["response_msg"] = f"호 선택 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -502,8 +519,9 @@ def captcha_APP(driver, **kwargs):
             captcha_filename = os.path.join(save_path, "captcha.png")
             im.save(captcha_filename)
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"캡차 이미지 처리 중 예외 발생: {e}"
+            response["response_msg"] = f"캡차 이미지 처리 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -515,8 +533,9 @@ def captcha_APP(driver, **kwargs):
             time.sleep(5)
             captcha_input.send_keys(predict_sh.get_predictions())
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"캡차 입력 중 예외 발생: {e}"
+            response["response_msg"] = f"캡차 입력 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -527,8 +546,9 @@ def captcha_APP(driver, **kwargs):
             )
             confirm_button.click()
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"확인 버튼 클릭 중 예외 발생: {e}"
+            response["response_msg"] = f"확인 버튼 클릭 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
@@ -545,14 +565,16 @@ def captcha_APP(driver, **kwargs):
             response["response_msg"] = "성공적으로 하한평균가를 가져왔습니다."
             response["data"] = [0, rtechApp_low_value, 0, 0]
         except Exception as e:
+            error = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"하한평균가 가져오기 중 예외 발생: {e}"
+            response["response_msg"] = f"하한평균가 가져오기 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
 
     except Exception as e:
+        error = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
-        response["response_msg"] = f"예상치 못한 오류 발생: {e}"
+        response["response_msg"] = f"예상치 못한 오류 발생: {error}"
         response["data"] = [0, 0, 0, 0]
         return response
 

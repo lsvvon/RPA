@@ -8,7 +8,7 @@ def main(**kwargs):
     try:
         driver = common_module.initialize_driver()
         response = Wetax_module.wetax_officetel(driver, **kwargs)
-        common_module.screenshot_save(driver, "rtech_capImg")
+        common_module.screenshot_save(driver)
 
         return response
     

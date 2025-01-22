@@ -33,6 +33,7 @@ elements_to_find = [
     (By.ID, "Estate_Gubun1", "Estate_Gubun1"),
     (By.ID, "Sido1", "Sido1"),
     (By.ID, "Sigungu1", "Sigungu1"),
+    (By.ID, "Sigungu2", "Sigungu2"),
     (By.ID, "Ridong1", "Ridong1"),
     (By.ID, "Jibun_No1", "Jibun_No1"),
     (By.ID, "Jibun_No2", "Jibun_No2"),
@@ -177,11 +178,11 @@ def main(data):
                         Estate_Gubun=Estate_Gubun,
                         **{key: value for key, value in collected_data.items() if key not in ["Search_Gubun", "addResch"]}
                     )                    
-                elif ticker == "Etax" or ticker == "Wetax":
+                elif ticker == "Etax1" or ticker == "Wetax1":
                     result = module_mapping[ticker](
                         **{key: value for key, value in collected_data.items()}
                     )
-                # elif ticker == "Realty1":
+                # elif ticker == "KBLand":
                 #     result = module_mapping[ticker](
                 #         Search_Gubun=Search_Gubun,
                 #         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
@@ -191,18 +192,18 @@ def main(data):
                 #         Search_Gubun=Search_Gubun,
                 #         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
                 #     )                            
-                else:
-                    result = module_mapping[ticker](
-                        Search_Gubun=Search_Gubun,
-                        **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
-                    )
+                # else:
+                #     result = module_mapping[ticker](
+                #         Search_Gubun=Search_Gubun,
+                #         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
+                #     )
 
-                if ticker == 'KBLand':
-                    KBland_ResCode = result['response_code']
-                elif ticker == 'Rtech':
-                    Rtech_ResCode = result['response_code']
-                else: 
-                    Etc_ResCode = result['response_code']
+                # if ticker == 'KBLand':
+                #     KBland_ResCode = result['response_code']
+                # elif ticker == 'Rtech':
+                #     Rtech_ResCode = result['response_code']
+                # else: 
+                #     Etc_ResCode = result['response_code']
 
                 # print(f"{ticker} : response value!!!")    
                 # print("KBland_ResCode:", KBland_ResCode)

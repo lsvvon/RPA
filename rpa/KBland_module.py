@@ -25,7 +25,7 @@ def KBland_streetnum(driver, **kwargs):
         Building_Name = kwargs.get('Building_Name1')
         Build_Area = kwargs.get('Build_Area1')
 
-        url = "https://kbland.kr/map?xy=37.5205559,126.9265729,17"
+        url = "https://kbland.kr/home"
         driver.get(url)
 
         # 팝업창 종료
@@ -77,11 +77,79 @@ def KBland_streetnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"주소 입력 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
 
+        def parse_cost_value(text):
+            match = re.match(r"(\d+)억\s*([\d,]*)", text)
+            if match:
+                billion = int(match.group(1)) * 10**8
+                million = int(match.group(2).replace(",", "")) * 10**4 if match.group(2) else 0
+                return billion + million
+            return 0
+            
+        def proceed_with_area_selection(driver, Build_Area, response):
+            try:
+                time.sleep(3)
+                area_select_div = WebDriverWait(driver, 20).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, ".widthTypeValue"))
+                )
+                driver.execute_script("arguments[0].click();", area_select_div)
+                time.sleep(3)
+
+                area_elements = WebDriverWait(driver, 20).until(
+                    EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tdbold"))
+                )
+                area_list = [element.text for element in area_elements]
+                cnt = 0
+
+                for i in range(len(area_list)):
+                    cnt += 1
+                    if Build_Area in area_list[i]:
+                        area_select = driver.find_elements(By.CLASS_NAME, "tdbold")[i]
+                        driver.execute_script("arguments[0].click();", area_select)
+                        break
+
+                if cnt == len(area_list):
+                    raise TimeoutException(f"'{Build_Area}' 면적 값을 찾을 수 없습니다.")
+
+                common_value_element = WebDriverWait(driver, 20).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, ".costvalue"))
+                )
+                common_value_text = common_value_element.text.strip()       
+
+                if "시세없음" in common_value_text:  # 시세없음인 경우 0 반환
+                    kb_common_value = 0
+                    kb_low_value = 0
+                    print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
+                else:
+                    kb_common_value = parse_cost_value(common_value_text)
+                    # 하위평균가 가져오기
+                    low_value_element = WebDriverWait(driver, 20).until(
+                        EC.visibility_of_element_located((By.XPATH, "//span[em[text()='하위평균가']]"))
+                    )
+                    low_value_text = low_value_element.text.replace("하위평균가", "").strip()
+                    kb_low_value = parse_cost_value(low_value_text)
+                    # 기준일 가져오기
+                    date_element = WebDriverWait(driver, 20).until(
+                        EC.visibility_of_element_located((By.XPATH, "//span[@class='costdate']"))
+                    )
+                    date_text = date_element.text.replace("’", "").strip()
+
+                response["response_code"] = "00000000"
+                response["response_msg"] = "정상적으로 처리되었습니다."
+                response["data"] = [kb_common_value, kb_low_value, 0, date_text]            
+                return response
+
+            except TimeoutException:
+                response["response_code"] = "90000000"
+                response["response_msg"] = "예상치 못한 오류 발생."
+                response["data"] = [0, 0, 0, 0]
+                return response
+            
         # 검색 결과 처리
         try:
             WebDriverWait(driver, 10).until(
@@ -120,80 +188,14 @@ def KBland_streetnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"검색 결과 처리 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
-
+            
     except Exception as e:
-        response["response_code"] = "90000001"
-        response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
-        response["data"] = [0, 0, 0, 0]
-        return response
-
-    return response
-
-def parse_cost_value(text):
-    match = re.match(r"(\d+)억\s*([\d,]*)", text)
-    if match:
-        billion = int(match.group(1)) * 10**8
-        million = int(match.group(2).replace(",", "")) * 10**4 if match.group(2) else 0
-        return billion + million
-    return 0
-    
-def proceed_with_area_selection(driver, Build_Area, response):
-    try:
-        time.sleep(3)
-        area_select_div = WebDriverWait(driver, 20).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, ".widthTypeValue"))
-        )
-        driver.execute_script("arguments[0].click();", area_select_div)
-        time.sleep(3)
-
-        area_elements = WebDriverWait(driver, 20).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tdbold"))
-        )
-        area_list = [element.text for element in area_elements]
-        cnt = 0
-
-        for i in range(len(area_list)):
-            cnt += 1
-            if Build_Area in area_list[i]:
-                area_select = driver.find_elements(By.CLASS_NAME, "tdbold")[i]
-                driver.execute_script("arguments[0].click();", area_select)
-                break
-
-        if cnt == len(area_list):
-            raise TimeoutException(f"'{Build_Area}' 면적 값을 찾을 수 없습니다.")
-
-        common_value_element = WebDriverWait(driver, 20).until(
-            EC.visibility_of_element_located((By.CSS_SELECTOR, ".costvalue"))
-        )
-        common_value_text = common_value_element.text.strip()
-        
-        if "시세없음" in common_value_text:  # 시세없음인 경우 0 반환
-            kb_common_value = 0
-            kb_low_value = 0
-            print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
-        else:
-            kb_common_value = parse_cost_value(common_value_text)
-            # 하위평균가 가져오기
-            low_value_element = WebDriverWait(driver, 20).until(
-                EC.visibility_of_element_located((By.XPATH, "//span[em[text()='하위평균가']]"))
-            )
-            low_value_text = low_value_element.text.replace("하위평균가", "").strip()
-            kb_low_value = parse_cost_value(low_value_text)
-
-        response["response_code"] = "00000000"
-        response["response_msg"] = "정상적으로 처리되었습니다."
-        response["data"] = [kb_common_value, kb_low_value, 0, 0]
-
-    except TimeoutException:
-        response["response_code"] = "90000000"
-        response["response_msg"] = "예상치 못한 오류 발생."
-        response["data"] = [0, 0, 0, 0]
-        return response
-    except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"예상치 못한 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -270,6 +272,7 @@ def KBland_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"주소 입력 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -336,7 +339,15 @@ def KBland_roadnum(driver, **kwargs):
                         )
                         low_value_text = low_value_element.text.replace("하위평균가", "").strip()
                         kb_low_value = parse_cost_value(low_value_text)
+
+                        # 기준일 가져오기
+                        date_element = WebDriverWait(driver, 20).until(
+                            EC.visibility_of_element_located((By.XPATH, "//span[@class='costdate']"))
+                        )
+                        date_text = date_element.text.replace("’", "").strip()
+                        
                 except Exception as e:
+                    e = str(e).split("\\n")[0]
                     response["response_code"] = "90000001"
                     response["response_msg"] = f"일반가 값을 가져오는 중 오류 발생. 오류: {e}"
                     response["data"] = [0, 0, 0, 0]
@@ -344,11 +355,12 @@ def KBland_roadnum(driver, **kwargs):
                 time.sleep(3)      
                 response["response_code"] = "00000000"
                 response["response_msg"] = "정상적으로 처리되었습니다."
-                response["data"] = [kb_common_value, kb_low_value, 0, 0]
-
+                response["data"] = [kb_common_value, kb_low_value, 0, date_text]
+                return response
 
 
             except Exception as e:
+                e = str(e).split("\\n")[0]
                 response["response_code"] = "90000001"
                 response["response_msg"] = f"일반가 값을 가져오는 중 오류 발생. 오류: {e}"
                 response["data"] = [0, 0, 0, 0]
@@ -401,19 +413,17 @@ def KBland_roadnum(driver, **kwargs):
                     return response
 
         except Exception as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"항목을 찾지 못했습니다: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
         
-    except TimeoutException:
-        response["response_code"] = "90000000"
-        response["response_msg"] = "면적 선택 중 타임아웃 발생."
-        response["data"] = [0, 0, 0, 0]
-        return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"예상치 못한 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
         return response
+    
     return response

@@ -21,6 +21,7 @@ def hometax_streetnum(driver, **kwargs):
         # 주소 값 가져오기
         Sido = kwargs.get('Sido1')
         Sigungu = kwargs.get('Sigungu1')
+        Sigungu2 = kwargs.get('Sigungu2')
         Ridong = kwargs.get('Ridong1')
         Jibun_No1 = kwargs.get('Jibun_No1')
         Jibun_No2 = kwargs.get('Jibun_No2')
@@ -138,6 +139,7 @@ def hometax_streetnum(driver, **kwargs):
                     select_button.click()
                     break
             except Exception as e:
+                e = str(e).split("\\n")[0]
                 response["response_code"] = "90000001"
                 response["response_msg"] = f"해당 행의 선택 버튼 없음: {e}"
                 response["data"] = [0, 0, 0, 0]
@@ -195,6 +197,7 @@ def hometax_streetnum(driver, **kwargs):
                 return response 
 
         except Exception as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"해당 물건지 찾기 도중 에러발생: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -217,13 +220,13 @@ def hometax_streetnum(driver, **kwargs):
                     if Room_No in option.text:
                         select.select_by_visible_text(option.text)
                         break
-                    else:
-                        response["response_code"] = "90000001"
-                        response["response_msg"] = "동 선택하는 데 실패했습니다"
-                        response["data"] = [0, 0, 0, 0]
-                        return response
+                response["response_code"] = "90000001"
+                response["response_msg"] = "동 선택하는 데 실패했습니다"
+                response["data"] = [0, 0, 0, 0]
+                return response
 
             except Exception as e:
+                e = str(e).split("\\n")[0]
                 response["response_code"] = "90000001"
                 response["response_msg"] = f"'{Building_No1}' 값으로 선택하는 데 실패했습니다: {e}"
                 response["data"] = [0, 0, 0, 0]
@@ -236,7 +239,7 @@ def hometax_streetnum(driver, **kwargs):
             )
             select_1 = Select(select_floor)
             select_1.select_by_visible_text(Floor)
-
+            time.sleep(2)
             # 호
             select_ho = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldHo'))
@@ -248,12 +251,12 @@ def hometax_streetnum(driver, **kwargs):
                 if Room_No in option.text:  # "201"이 포함된 텍스트를 찾아 선택
                     select_2.select_by_visible_text(option.text)
                     break
-                else:
-                    response["response_code"] = "90000001"
-                    response["response_msg"] = "층/호 선택하는 데 실패했습니다"
-                    response["data"] = [0, 0, 0, 0]
-                    return response
+            response["response_code"] = "90000001"
+            response["response_msg"] = "층/호 선택하는 데 실패했습니다"
+            response["data"] = [0, 0, 0, 0]
+            
         except Exception as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"층/호 선택하는 데 실패했습니다: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -287,9 +290,15 @@ def hometax_streetnum(driver, **kwargs):
             raw_size = size_element.text.strip()  # '36.4'
             hometax_size_value = float(raw_size)  # 실수로 변환
 
+            # 기준일
+            date_element = WebDriverWait(driver, 20).until(
+                EC.visibility_of_element_located((By.XPATH, "//td[@data-col_id='notcDt']/nobr"))
+            )
+            date_value = date_element.text.strip() 
+
             response["response_code"] = "00000000"
             response["response_msg"] = "정상적으로 처리되었습니다."
-            response["data"] = [hometax_price_value, 0, hometax_size_value, 0]
+            response["data"] = [hometax_price_value, 0, hometax_size_value, date_value]
 
         except TimeoutException:
             response["response_code"] = "90000000"
@@ -298,6 +307,7 @@ def hometax_streetnum(driver, **kwargs):
             return response 
         
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"예상치 못한 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -444,6 +454,7 @@ def hometax_roadnum(driver, **kwargs):
                 return response 
             
         except Exception as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = "해당 물건지 찾기 오류 발생."
             response["data"] = [0, 0, 0, 0]
@@ -475,6 +486,7 @@ def hometax_roadnum(driver, **kwargs):
                 return response
 
         except Exception as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"해당 물건지 찾기 도중 에러발생: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -498,7 +510,13 @@ def hometax_roadnum(driver, **kwargs):
                     if Room_No in option.text:
                         select.select_by_visible_text(option.text)
                         break
+                response["response_code"] = "90000001"
+                response["response_msg"] = "동 선택하는 데 실패했습니다"
+                response["data"] = [0, 0, 0, 0]
+                return response
+
             except Exception as e:
+                    e = str(e).split("\\n")[0]
                     response["response_code"] = "90000001"
                     response["response_msg"] = f"'{Building_No1}' 값으로 선택하는 데 실패했습니다: {e}"
                     response["data"] = [0, 0, 0, 0]
@@ -511,19 +529,25 @@ def hometax_roadnum(driver, **kwargs):
             )
             select_1 = Select(select_floor)
             select_1.select_by_visible_text(Floor)
-
+            time.sleep(2)
             # 호
             select_ho = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldHo'))
             )
             select_2 = Select(select_ho)
+            time.sleep(2)
             # 선택 가능한 모든 옵션 가져오기
             options = select_2.options
             for option in options:
                 if Room_No in option.text:  # "201"이 포함된 텍스트를 찾아 선택
                     select_2.select_by_visible_text(option.text)
                     break
+            response["response_code"] = "90000001"
+            response["response_msg"] = "층/호 선택하는 데 실패했습니다"
+            response["data"] = [0, 0, 0, 0]
+
         except Exception as e:
+            e = str(e).split("\\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"층/호 선택하는 데 실패했습니다: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -556,9 +580,16 @@ def hometax_roadnum(driver, **kwargs):
             )
             raw_size = size_element.text.strip()  # '36.4'
             hometax_size_value = float(raw_size)  # 실수로 변환
+
+            # 기준일
+            date_element = WebDriverWait(driver, 20).until(
+                EC.visibility_of_element_located((By.XPATH, "//td[@data-col_id='notcDt']/nobr"))
+            )
+            date_value = date_element.text.strip() 
+
             response["response_code"] = "00000000"
             response["response_msg"] = "정상적으로 처리되었습니다."
-            response["data"] = [hometax_price_value, 0, hometax_size_value, 0]
+            response["data"] = [hometax_price_value, 0, hometax_size_value, date_value]
 
         except TimeoutException:
             response["response_code"] = "90000000"
@@ -567,6 +598,7 @@ def hometax_roadnum(driver, **kwargs):
             return response 
 
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]

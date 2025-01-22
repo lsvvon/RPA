@@ -35,31 +35,31 @@ def wetax_officetel(driver, **kwargs):
     driver.get(url)
 
     time.sleep(5)
-    try:
-        # iframe 내로 전환
-        iframe = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "iframe"))
-        )
-        driver.switch_to.frame(iframe)
+    # try:
+    #     # iframe 내로 전환
+    #     iframe = WebDriverWait(driver, 10).until(
+    #         EC.presence_of_element_located((By.TAG_NAME, "iframe"))
+    #     )
+    #     driver.switch_to.frame(iframe)
 
-        # 닫기 버튼을 찾기 위한 XPath
-        close_button = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//img[@alt='닫기' and contains(@style, 'position: absolute')]"))
-        )
-        # 버튼 클릭
-        driver.execute_script("arguments[0].click();", close_button)
-        # iframe에서 메인 페이지로 돌아가기
-        driver.switch_to.default_content()
-    except TimeoutException:
-        response["response_code"] = "90000000"
-        response["response_msg"] = "팝업 닫기 버튼이 존재하지 않음."
-        response["data"] = [0, 0, 0, 0]
-        return response
-    except Exception as e:
-        response["response_code"] = "90000001"
-        response["response_msg"] = f"팝업 닫기 버튼 클릭 중 예외 발생: {e}"
-        response["data"] = [0, 0, 0, 0]
-        return response
+    #     # 닫기 버튼을 찾기 위한 XPath
+    #     close_button = WebDriverWait(driver, 10).until(
+    #         EC.presence_of_element_located((By.XPATH, "//img[@alt='닫기' and contains(@style, 'position: absolute')]"))
+    #     )
+    #     # 버튼 클릭
+    #     driver.execute_script("arguments[0].click();", close_button)
+    #     # iframe에서 메인 페이지로 돌아가기
+    #     driver.switch_to.default_content()
+    # except TimeoutException:
+    #     response["response_code"] = "90000000"
+    #     response["response_msg"] = "팝업 닫기 버튼이 존재하지 않음."
+    #     response["data"] = [0, 0, 0, 0]
+    #     return response
+    # except Exception as e:
+    #     response["response_code"] = "90000001"
+    #     response["response_msg"] = f"팝업 닫기 버튼 클릭 중 예외 발생: {e}"
+    #     response["data"] = [0, 0, 0, 0]
+    #     return response
 
     try:
         # 관할 자치단체 선택
@@ -73,6 +73,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"시도 선택 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -105,6 +106,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"읍면동 선택 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -121,6 +123,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"기준연도 선택 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -137,6 +140,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"특수번지 선택 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -154,6 +158,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"본번지 입력 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -171,6 +176,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"부번지 입력 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -188,6 +194,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"건물 동 입력 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -205,6 +212,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"건물 호 입력 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -222,6 +230,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"검색 버튼 클릭 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -240,7 +249,7 @@ def wetax_officetel(driver, **kwargs):
         wetax_value = int(raw_text.replace(",", ""))
         
         response["response_code"] = "00000000"
-        response["response_msg"] = "성공"
+        response["response_msg"] = "정상적으로 처리되었습니다."
         response["data"] = [wetax_value, 0, 0, 0]
 
     except TimeoutException:
@@ -249,6 +258,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
+        e = str(e).split("\\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"건물시가표준액 요소 찾기 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
