@@ -13,6 +13,7 @@ import Realty3
 import Rtech1
 import Rtech2
 import Wetax
+import os
 
 # 드라이버 초기화
 chrome_options = Options()
@@ -44,6 +45,7 @@ elements_to_find = [
     (By.ID, "Doro_Name1", "Doro_Name1"),
     (By.ID, "Chosung1", "Chosung1"),
     (By.ID, "Build_Area1", "Build_Area1"),
+    (By.ID, "Lease_Inv_Mng_No1", "Lease_Inv_Mng_No1"),
     (By.ID, "Floor1", "Floor1"),
     (By.ID, "Ticker", "Ticker"),
     (By.ID, "Ticker2", "Ticker2"),
@@ -57,6 +59,13 @@ elements_to_find = [
     (By.ID, "addResch4", "addResch4"),
     (By.ID, "addResch5", "addResch5"),
     (By.ID, "addResch6", "addResch6"),
+    (By.ID, "Rank_No", "Rank_No"),
+    (By.ID, "Rank_No2", "Rank_No2"),
+    (By.ID, "Rank_No3", "Rank_No3"),
+    (By.ID, "Rank_No4", "Rank_No4"),
+    (By.ID, "Rank_No5", "Rank_No5"),
+    (By.ID, "Rank_No6", "Rank_No6"),
+
 ]
 
 # 수집된 데이터 저장
@@ -68,24 +77,28 @@ for by, value, description in elements_to_find:
         element = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((by, value))
         )
-        value_attribute = element.get_attribute("value").strip() if element.get_attribute("value") else "값 없음"
+        value_attribute = element.get_attribute("value").strip() if element.get_attribute("value") else ""
         collected_data[description] = value_attribute
     except Exception as e:
         print(f"{description} 요소를 찾을 수 없습니다:", e)
         collected_data[description] = "오류 발생"
 
-# print(collected_data)
+# print("collected_data", collected_data)
 
 # ticker와 addResch를 순서대로 매핑하여 데이터 수집
 tickers = ["Ticker", "Ticker2", "Ticker3", "Ticker4", "Ticker5", "Ticker6"]
 add_reschs = ["addResch", "addResch2", "addResch3", "addResch4", "addResch5", "addResch6"]
+ranks = ["Rank_No", "Rank_No2", "Rank_No3", "Rank_No4", "Rank_No5", "Rank_No6"]
 data = []
+dataloop = []
 
-for ticker_key, add_resch_key in zip(tickers, add_reschs):
+for ticker_key, add_resch_key, rank_key in zip(tickers, add_reschs, ranks):
     ticker_value = collected_data.get(ticker_key)
-    if ticker_value and ticker_value != "값 없음":
+    rank_value = collected_data.get(rank_key)
+    if ticker_value and ticker_value != "":
         entry = {
             "Ticker": ticker_value,
+            "Rank": rank_value,
             "addResch": collected_data.get(add_resch_key, "기본값"),
             "Search_Gubun": collected_data.get("Search_Gubun1"),
             "Estate_Gubun": collected_data.get("Estate_Gubun1")
@@ -95,23 +108,25 @@ for ticker_key, add_resch_key in zip(tickers, add_reschs):
 # 확인용 출력
 # print(data)
 
+
 # 실행 가능한 모듈과 해당 메인 함수의 매핑
 module_mapping = {
-    "Etax": lambda **kwargs: Etax.main(**kwargs),
-    "Wetax": lambda **kwargs: Wetax.main(**kwargs),
-    "Hometax": lambda Search_Gubun, **kwargs: Hometax.main(Search_Gubun, **kwargs),
-    "KBLand": lambda Search_Gubun, **kwargs: KBland.main(Search_Gubun, **kwargs),
-    "Realty1": lambda Search_Gubun, **kwargs: Realty1.main(Search_Gubun, **kwargs),
-    "Realty2": lambda Search_Gubun, **kwargs: Realty2.main(Search_Gubun, **kwargs),
-    "Realty3": lambda Search_Gubun, **kwargs: Realty3.main(Search_Gubun, **kwargs),
-    "Rtech": lambda addResch, Search_Gubun, Estate_Gubun, **kwargs: Rtech1.main(addResch, Search_Gubun, Estate_Gubun, **kwargs),
-    "Rtech2": lambda Search_Gubun, **kwargs: Rtech2.main(Search_Gubun, **kwargs),  
+    "Etax": lambda dataloop, kwargs: Etax.main(dataloop, kwargs),
+    "Wetax": lambda dataloop, kwargs: Wetax.main(dataloop, kwargs),
+    "Hometax": lambda dataloop, kwargs: Hometax.main(dataloop, kwargs),
+    "KBLand": lambda dataloop, kwargs: KBland.main(dataloop, kwargs),
+    "Realty1": lambda dataloop, kwargs: Realty1.main(dataloop, kwargs),
+    "Realty2": lambda dataloop, kwargs: Realty2.main(dataloop, kwargs),
+    "Realty3": lambda dataloop, kwargs: Realty3.main(dataloop, kwargs),
+    "Rtech": lambda dataloop, kwargs: Rtech1.main(dataloop, kwargs),
+    "Rtech2": lambda dataloop, kwargs: Rtech2.main(dataloop, kwargs),  
 }
 
 def data_insert(result, i):
+    
     if i == 1:
         i = ''
-    print("result : ", result)
+
     if result:
         response_code_input = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "Response_Code" + str(i)))
@@ -146,6 +161,33 @@ def data_insert(result, i):
     else:
         print("main data insert 결과를 사용할 수 없습니다.")
 
+# 첨부 파일 처리
+def file_attach(dataloop, collected_data, i):    
+    # file_name = "5000000000_901.png"  # 업로드하려는 파일 이름
+    folder_path = r"C:\python\RPA\rpa\capImg"  # capImg 폴더의 절대 경로
+    # file_path = os.path.join(folder_path, file_name)
+
+    Lease_Inv_Mng_No = collected_data.get('Lease_Inv_Mng_No1')
+       
+    for entry in dataloop:
+        Rank = entry.get("Rank") 
+
+    # 파일 경로 설정
+    next_seq = "70" + Rank
+    file_name = f"{Lease_Inv_Mng_No}_{next_seq}.png"    
+    file_path = os.path.join(folder_path, file_name)
+
+    if i == 1:
+        i = ''
+    
+    print("file_path:", file_path, i)
+
+    # 파일 첨부
+    txtFile_capImg = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "txtFile" + str(i)))
+    )
+    txtFile_capImg.send_keys(file_path)
+ 
 
 def main(data):
     result = None
@@ -158,8 +200,20 @@ def main(data):
     for entry in data:
         ticker = entry["Ticker"]
         addResch = entry["addResch"]
+        rank = entry["Rank"]
         Search_Gubun = entry["Search_Gubun"]
         Estate_Gubun = entry["Estate_Gubun"]
+
+        dataloop = []
+        entry2 = {
+            "Ticker": ticker,
+            "Rank": rank,
+            "addResch": addResch,
+            "Search_Gubun": Search_Gubun,
+            "Estate_Gubun": Estate_Gubun
+        }
+        dataloop.append(entry2)
+
         print(f"{ticker} 실행 중...")
 
         # 우선순위 정상처리되면 종료한다.
@@ -170,33 +224,11 @@ def main(data):
         
         try:
             if ticker in module_mapping:
-                if ticker == "Rtech":
-                    # Search_Gubun과 addResch는 entry에 포함되었으므로 빼고 전달
+                if ticker == "Rtech2":
                     result = module_mapping[ticker](
-                        addResch=addResch,
-                        Search_Gubun=Search_Gubun,
-                        Estate_Gubun=Estate_Gubun,
-                        **{key: value for key, value in collected_data.items() if key not in ["Search_Gubun", "addResch"]}
-                    )                    
-                elif ticker == "Etax1" or ticker == "Wetax1":
-                    result = module_mapping[ticker](
-                        **{key: value for key, value in collected_data.items()}
-                    )
-                # elif ticker == "KBLand":
-                #     result = module_mapping[ticker](
-                #         Search_Gubun=Search_Gubun,
-                #         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
-                #     )
-                # elif ticker == "Hometax":
-                #     result = module_mapping[ticker](
-                #         Search_Gubun=Search_Gubun,
-                #         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
-                #     )                            
-                # else:
-                #     result = module_mapping[ticker](
-                #         Search_Gubun=Search_Gubun,
-                #         **{key: value for key, value in collected_data.items() if key != "Search_Gubun"}
-                #     )
+                    dataloop,
+                    collected_data
+                )                    
 
                 # if ticker == 'KBLand':
                 #     KBland_ResCode = result['response_code']
@@ -212,6 +244,9 @@ def main(data):
 
                 # 화면값 세팅값    
                 data_insert(result, i)
+                # 첨부 파일 처리
+                file_attach(dataloop, collected_data, i)
+
                 print(f"{ticker} 실행 완료.")
                 
             else:

@@ -5,17 +5,20 @@ from selenium.common.exceptions import TimeoutException
 MAX_RETRIES = 3
 
 
-def main(Search_Gobun, **kwargs):
+def main(dataloop, collected_data):
     driver = None
     try:
         driver = common_module.initialize_driver()
-        if Search_Gobun == '1': # 지번검색일떄 
-            response = Hometax_module.hometax_streetnum(driver, **kwargs)
+        for entry in dataloop:
+            Search_Gubun = entry.get("Search_Gubun") 
+        
+        if Search_Gubun == '1': # 지번검색일떄 
+            response = Hometax_module.hometax_streetnum(driver, collected_data)
 
-        elif Search_Gobun == '2':   # 도로명검색일때
-            response = Hometax_module.hometax_roadnum(driver, **kwargs)
+        elif Search_Gubun == '2':   # 도로명검색일때
+            response = Hometax_module.hometax_roadnum(driver, collected_data)
             
-        common_module.screenshot_save(driver)
+        common_module.screenshot_save(driver, dataloop, collected_data)
         return response
     
     finally:

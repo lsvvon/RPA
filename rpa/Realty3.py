@@ -4,18 +4,21 @@ import common_module
 
 
 
-def main(Search_Gubun, **kwargs):
+def main(dataloop, collected_data):
     driver = None
 
     try: 
         driver = common_module.initialize_driver()
+        for entry in dataloop:
+            Search_Gubun = entry.get("Search_Gubun")
+
         if Search_Gubun == '1':
-            response = realtyprice_module.realtyprice_land_streetnum(driver, **kwargs)
+            response = realtyprice_module.realtyprice_land_streetnum(driver, collected_data)
 
         elif Search_Gubun == '2':
-            response = realtyprice_module.realtyprice_land_roadnum(driver, **kwargs)
+            response = realtyprice_module.realtyprice_land_roadnum(driver, collected_data)
 
-        common_module.screenshot_save(driver)
+        common_module.screenshot_save(driver, dataloop, collected_data)
         return response
 
     finally:

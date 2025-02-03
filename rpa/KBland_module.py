@@ -8,12 +8,20 @@ import time
 import re
 
 # 지번 검색
-def KBland_streetnum(driver, **kwargs):
+def KBland_streetnum(driver, dataloop, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
         "data": None,
     }
+
+    for entry in dataloop:
+        Estate_Gubun = entry.get("Estate_Gubun") 
+
+    if Estate_Gubun == '1':
+        Estate_Name = '아파트'
+    elif Estate_Gubun == '4':
+        Estate_Name = '오피스텔'
 
     try:
         # 주소 값 가져오기
@@ -71,13 +79,15 @@ def KBland_streetnum(driver, **kwargs):
             input_element.send_keys(address)
             input_element.send_keys(Keys.ENTER)
             time.sleep(5)
+        
+
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "주소 입력 중 타임아웃 발생."
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"주소 입력 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -114,16 +124,21 @@ def KBland_streetnum(driver, **kwargs):
                         break
 
                 if cnt == len(area_list):
-                    raise TimeoutException(f"'{Build_Area}' 면적 값을 찾을 수 없습니다.")
-
+                    response["response_code"] = "90000000"
+                    response["response_msg"] = "면적을 찾을 수 없음."
+                    response["data"] = [0, 0, 0, 0]
+                    return response
+                
+                time.sleep(3)
                 common_value_element = WebDriverWait(driver, 20).until(
                     EC.visibility_of_element_located((By.CSS_SELECTOR, ".costvalue"))
                 )
                 common_value_text = common_value_element.text.strip()       
 
                 if "시세없음" in common_value_text:  # 시세없음인 경우 0 반환
-                    kb_common_value = 0
+                    kb_common_value = '시세없음'
                     kb_low_value = 0
+                    date_text = 0
                     print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
                 else:
                     kb_common_value = parse_cost_value(common_value_text)
@@ -188,14 +203,14 @@ def KBland_streetnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"검색 결과 처리 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
             
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"예상치 못한 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -204,7 +219,7 @@ def KBland_streetnum(driver, **kwargs):
     return response
 
 # 도로명 주소 검색
-def KBland_roadnum(driver, **kwargs):
+def KBland_roadnum(driver, dataloop, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -272,7 +287,7 @@ def KBland_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"주소 입력 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -316,8 +331,10 @@ def KBland_roadnum(driver, **kwargs):
                         driver.execute_script("arguments[0].click();", area_select)
                         break
                 if cnt == len(area_list):
-                    print(f"'{area_data}' 면적을 찾을 수 없었습니다.")
-                    raise TimeoutException("면적 값을 찾을 수 없습니다.")  # 타임아웃 예외 발생
+                    response["response_code"] = "90000000"
+                    response["response_msg"] = "면적을 찾을 수 없음."
+                    response["data"] = [0, 0, 0, 0]
+                    return response
 
                 time.sleep(5)
 
@@ -328,8 +345,9 @@ def KBland_roadnum(driver, **kwargs):
                     common_value_text = common_value_element.text.strip()
                     
                     if "시세없음" in common_value_text:  # 시세없음인 경우 0 반환
-                        kb_common_value = 0
+                        kb_common_value = '시세없음'
                         kb_low_value = 0
+                        date_text = 0
                         print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
                     else:
                         kb_common_value = parse_cost_value(common_value_text)
@@ -347,7 +365,7 @@ def KBland_roadnum(driver, **kwargs):
                         date_text = date_element.text.replace("’", "").strip()
                         
                 except Exception as e:
-                    e = str(e).split("\\n")[0]
+                    e = str(e).split("\n")[0]
                     response["response_code"] = "90000001"
                     response["response_msg"] = f"일반가 값을 가져오는 중 오류 발생. 오류: {e}"
                     response["data"] = [0, 0, 0, 0]
@@ -360,7 +378,7 @@ def KBland_roadnum(driver, **kwargs):
 
 
             except Exception as e:
-                e = str(e).split("\\n")[0]
+                e = str(e).split("\n")[0]
                 response["response_code"] = "90000001"
                 response["response_msg"] = f"일반가 값을 가져오는 중 오류 발생. 오류: {e}"
                 response["data"] = [0, 0, 0, 0]
@@ -413,14 +431,14 @@ def KBland_roadnum(driver, **kwargs):
                     return response
 
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"항목을 찾지 못했습니다: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
         
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"예상치 못한 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]

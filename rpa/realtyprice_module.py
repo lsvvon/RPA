@@ -7,7 +7,7 @@ from selenium.webdriver.support.select import Select
 from selenium.common.exceptions import TimeoutException
 
 # 공동주택(아파트, 다세대)일 경우 - 지번 검색
-def realtyprice_apt_streetnum(driver, **kwargs):
+def realtyprice_apt_streetnum(driver, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -49,7 +49,6 @@ def realtyprice_apt_streetnum(driver, **kwargs):
         except TimeoutException:
             driver.switch_to.default_content()
         except Exception as e:
-            e = str(e).split("\\n")[0]
             print(f"모달 닫기 중 예외 발생: {e}")
             driver.switch_to.default_content()
 
@@ -205,13 +204,13 @@ def realtyprice_apt_streetnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"공동주택가격 값을 가져오는 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -219,7 +218,7 @@ def realtyprice_apt_streetnum(driver, **kwargs):
     return response
 
 
-def realtyprice_apt_roadnum(driver, **kwargs):
+def realtyprice_apt_roadnum(driver, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -267,7 +266,6 @@ def realtyprice_apt_roadnum(driver, **kwargs):
             print("모달 닫기 버튼이 존재하지 않음.")
             driver.switch_to.default_content()
         except Exception as e:
-            e = str(e).split("\\n")[0]
             print(f"모달 닫기 중 예외 발생: {e}")
             driver.switch_to.default_content()
 
@@ -425,21 +423,21 @@ def realtyprice_apt_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"공동주택가격 값을 가져오는 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
         
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
         return response
     return response
 
-def realtyprice_individual_streetnum(driver, **kwargs):
+def realtyprice_individual_streetnum(driver, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -487,7 +485,6 @@ def realtyprice_individual_streetnum(driver, **kwargs):
             print("모달 닫기 버튼이 존재하지 않음.")
             driver.switch_to.default_content()
         except Exception as e:
-            e = str(e).split("\\n")[0]
             print(f"모달 닫기 중 예외 발생: {e}")
             driver.switch_to.default_content()
 
@@ -607,21 +604,21 @@ def realtyprice_individual_streetnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"개별주택가격 값을 가져오는 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
 
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
         return response
     return response  
 
-def realtyprice_individual_roadnum(driver, **kwargs):
+def realtyprice_individual_roadnum(driver, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -669,7 +666,6 @@ def realtyprice_individual_roadnum(driver, **kwargs):
             print("모달 닫기 버튼이 존재하지 않음.")
             driver.switch_to.default_content()
         except Exception as e:
-            e = str(e).split("\\n")[0]
             print(f"모달 닫기 중 예외 발생: {e}")
             driver.switch_to.default_content()
 
@@ -803,7 +799,7 @@ def realtyprice_individual_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"개별주택가격 값을 가져오는 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -811,14 +807,14 @@ def realtyprice_individual_roadnum(driver, **kwargs):
             
       
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
         return response
     return response
 
-def realtyprice_land_streetnum(driver, **kwargs):
+def realtyprice_land_streetnum(driver, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -866,7 +862,6 @@ def realtyprice_land_streetnum(driver, **kwargs):
             print("모달 닫기 버튼이 존재하지 않음.")
             driver.switch_to.default_content()
         except Exception as e:
-            e = str(e).split("\\n")[0]
             print(f"모달 닫기 중 예외 발생: {e}")
             driver.switch_to.default_content()
 
@@ -974,21 +969,21 @@ def realtyprice_land_streetnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"개별공시지가 값을 가져오는 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
         
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
         return response
     return response  
 
-def realtyprice_land_roadnum(driver, **kwargs):
+def realtyprice_land_roadnum(driver, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -1038,7 +1033,7 @@ def realtyprice_land_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"모달 닫기 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -1156,14 +1151,14 @@ def realtyprice_land_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"개별공시지가 값을 가져오는 중 예외 발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
                 
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]

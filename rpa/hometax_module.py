@@ -11,7 +11,7 @@ from selenium.common.exceptions import TimeoutException
 # SSL 인증서 검증 무시 설정
 ssl._create_default_https_context = ssl._create_unverified_context
 
-def hometax_streetnum(driver, **kwargs):
+def hometax_streetnum(driver, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -139,7 +139,7 @@ def hometax_streetnum(driver, **kwargs):
                     select_button.click()
                     break
             except Exception as e:
-                e = str(e).split("\\n")[0]
+                e = str(e).split("\n")[0]
                 response["response_code"] = "90000001"
                 response["response_msg"] = f"해당 행의 선택 버튼 없음: {e}"
                 response["data"] = [0, 0, 0, 0]
@@ -182,22 +182,45 @@ def hometax_streetnum(driver, **kwargs):
                 )
             )
 
-            # 각 요소의 텍스트 확인
+            # Building_Name을 포함한 항목들
+            matching_items = []
+
+            # 조건에 맞는 항목들을 matching_items에 추가
             for item in visible_items:
                 item_text = item.text.strip()
 
                 if Building_Name in item_text:
-                    print(f"목표 항목 '{Building_Name}'를 찾았습니다. 클릭합니다.")
+                    matching_items.append(item)
+
+            # 만약 Building_Name을 포함한 항목이 하나라도 있으면
+            if matching_items:
+                # 그 중에서 building_no1을 포함한 항목을 찾는다
+                for item in matching_items:
+                    item_text = item.text.strip()
+                    if Building_No1 in item_text:
+                        print(f"목표 항목 '{Building_Name + Building_No1}'를 찾았습니다. 클릭합니다.")
+                        driver.execute_script("arguments[0].scrollIntoView();", item)
+                        item.click()
+                        break
+                    response["response_code"] = "90000001"
+                    response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
+                    response["data"] = [0, 0, 0, 0]
+                else:
+                    # building_no1을 포함하지 않지만, Building_Name을 포함하는 항목이 있으면 클릭
+                    print(f"목표 항목 '{Building_Name}'를 찾았습니다. building_no1을 포함하지 않지만 클릭합니다.")
+                    item = matching_items[0]  # 첫 번째 항목을 클릭
                     driver.execute_script("arguments[0].scrollIntoView();", item)
                     item.click()
-                    break
+
+            else:
+                # Building_Name을 포함한 항목을 찾지 못한 경우
                 response["response_code"] = "90000001"
-                response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
+                response["response_msg"] = f"목표 항목 '{Building_Name + Building_No1}'를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
-                return response 
+                return response
 
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"해당 물건지 찾기 도중 에러발생: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -217,16 +240,15 @@ def hometax_streetnum(driver, **kwargs):
             try:
                 options = select.options
                 for option in options:
-                    if Room_No in option.text:
+                    if Building_No1 in option.text:
                         select.select_by_visible_text(option.text)
                         break
                 response["response_code"] = "90000001"
                 response["response_msg"] = "동 선택하는 데 실패했습니다"
                 response["data"] = [0, 0, 0, 0]
-                return response
-
+            
             except Exception as e:
-                e = str(e).split("\\n")[0]
+                e = str(e).split("\n")[0]
                 response["response_code"] = "90000001"
                 response["response_msg"] = f"'{Building_No1}' 값으로 선택하는 데 실패했습니다: {e}"
                 response["data"] = [0, 0, 0, 0]
@@ -251,12 +273,10 @@ def hometax_streetnum(driver, **kwargs):
                 if Room_No in option.text:  # "201"이 포함된 텍스트를 찾아 선택
                     select_2.select_by_visible_text(option.text)
                     break
-            response["response_code"] = "90000001"
-            response["response_msg"] = "층/호 선택하는 데 실패했습니다"
-            response["data"] = [0, 0, 0, 0]
+
             
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"층/호 선택하는 데 실패했습니다: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -307,14 +327,14 @@ def hometax_streetnum(driver, **kwargs):
             return response 
         
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"예상치 못한 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]
         return response
     return response
 
-def hometax_roadnum(driver, **kwargs):
+def hometax_roadnum(driver, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -454,7 +474,7 @@ def hometax_roadnum(driver, **kwargs):
                 return response 
             
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = "해당 물건지 찾기 오류 발생."
             response["data"] = [0, 0, 0, 0]
@@ -471,28 +491,50 @@ def hometax_roadnum(driver, **kwargs):
                 )
             )
 
-            # 각 요소의 텍스트 확인
+            # Building_Name을 포함한 항목들
+            matching_items = []
+
+            # 조건에 맞는 항목들을 matching_items에 추가
             for item in visible_items:
                 item_text = item.text.strip()
 
                 if Building_Name in item_text:
-                    print(f"목표 항목 '{Building_Name}'를 찾았습니다. 클릭합니다.")
+                    matching_items.append(item)
+
+            # 만약 Building_Name을 포함한 항목이 하나라도 있으면
+            if matching_items:
+                # 그 중에서 building_no1을 포함한 항목을 찾는다
+                for item in matching_items:
+                    item_text = item.text.strip()
+                    if Building_No1 in item_text:
+                        print(f"목표 항목 '{Building_Name + Building_No1}'를 찾았습니다. 클릭합니다.")
+                        driver.execute_script("arguments[0].scrollIntoView();", item)
+                        item.click()
+                        break
+                    response["response_code"] = "90000001"
+                    response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
+                    response["data"] = [0, 0, 0, 0]
+                else:
+                    # building_no1을 포함하지 않지만, Building_Name을 포함하는 항목이 있으면 클릭
+                    print(f"목표 항목 '{Building_Name}'를 찾았습니다. building_no1을 포함하지 않지만 클릭합니다.")
+                    item = matching_items[0]  # 첫 번째 항목을 클릭
                     driver.execute_script("arguments[0].scrollIntoView();", item)
                     item.click()
-                    break
+
+            else:
+                # Building_Name을 포함한 항목을 찾지 못한 경우
                 response["response_code"] = "90000001"
-                response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
+                response["response_msg"] = f"목표 항목 '{Building_Name + Building_No1}'를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
 
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"해당 물건지 찾기 도중 에러발생: {e}"
             response["data"] = [0, 0, 0, 0]
             return response
 
-        time.sleep(3)
         # 상세주소 검색
         # 동
         select_dong = WebDriverWait(driver, 20).until(
@@ -513,15 +555,15 @@ def hometax_roadnum(driver, **kwargs):
                 response["response_code"] = "90000001"
                 response["response_msg"] = "동 선택하는 데 실패했습니다"
                 response["data"] = [0, 0, 0, 0]
-                return response
+            
 
             except Exception as e:
-                    e = str(e).split("\\n")[0]
-                    response["response_code"] = "90000001"
-                    response["response_msg"] = f"'{Building_No1}' 값으로 선택하는 데 실패했습니다: {e}"
-                    response["data"] = [0, 0, 0, 0]
-                    return response
-        
+                e = str(e).split("\n")[0]
+                response["response_code"] = "90000001"
+                response["response_msg"] = f"'{Building_No1}' 값으로 선택하는 데 실패했습니다: {e}"
+                response["data"] = [0, 0, 0, 0]
+                return response
+    
         try:
             # 층
             select_floor = WebDriverWait(driver, 20).until(
@@ -547,7 +589,7 @@ def hometax_roadnum(driver, **kwargs):
             response["data"] = [0, 0, 0, 0]
 
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
             response["response_msg"] = f"층/호 선택하는 데 실패했습니다: {e}"
             response["data"] = [0, 0, 0, 0]
@@ -598,7 +640,7 @@ def hometax_roadnum(driver, **kwargs):
             return response 
 
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]

@@ -8,12 +8,13 @@ import time
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 
-def etax_officetel(driver, **kwargs):
+def etax_officetel(driver, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
         "data": None,
     }
+
     try:
         # 주소 값 가져오기
         Sido = kwargs.get('Sido1')
@@ -53,7 +54,7 @@ def etax_officetel(driver, **kwargs):
             print("모달 닫기 버튼이 존재하지 않음.")
             driver.switch_to.default_content()
         except Exception as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             print(f"팝업 닫기 버튼 클릭 중 예외 발생: {e}")
             driver.switch_to.default_content()
 
@@ -123,8 +124,38 @@ def etax_officetel(driver, **kwargs):
             SIGU_CD.select_by_visible_text(Sigungu)
             time.sleep(3)
 
+            value_map = {
+                "강남구": "680",
+                "강동구": "740",
+                "강북구": "305",
+                "강서구": "500",
+                "관악구": "620",
+                "광진구": "215",
+                "구로구": "530",
+                "금천구": "545",
+                "노원구": "350",
+                "도봉구": "320",
+                "동대문구": "230",
+                "동작구": "590",
+                "마포구": "440",
+                "서대문구": "410",
+                "서초구": "650",
+                "성동구": "200",
+                "성북구": "290",
+                "송파구": "710",
+                "양천구": "470",
+                "영등포구": "560",
+                "용산구": "170",
+                "은평구": "380",
+                "종로구": "110",
+                "중구": "140",
+                "중랑구": "260"
+            }
+                        
             # 법정동
-            hDONG = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "HDONG170")))
+            hDONG = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.NAME, f"HDONG{value_map[Sigungu]}"))
+            )
             HDONG = Select(hDONG)
             HDONG.select_by_visible_text(Ridong)
             time.sleep(3)
@@ -164,7 +195,7 @@ def etax_officetel(driver, **kwargs):
             time.sleep(3)
      
         except NoSuchElementException as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000002"
             response["response_msg"] = f"년도/관할구청/법정동/특수지/번지 요소 찾을 수 없습니다. {e}"
             response["data"] = [0, 0, 0, 0]
@@ -190,7 +221,7 @@ def etax_officetel(driver, **kwargs):
             response["data"] = [etax_value, 0, 0, 0]
 
         except NoSuchElementException as e:
-            e = str(e).split("\\n")[0]
+            e = str(e).split("\n")[0]
             response["response_code"] = "90000002"
             response["response_msg"] = f"건물시가표준액 요소 찾을 수 없습니다. {e}"
             response["data"] = [0, 0, 0, 0]
@@ -202,7 +233,7 @@ def etax_officetel(driver, **kwargs):
             return response 
     
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"프로세스 실행 중 알 수 없는 오류 발생: {e}"
         response["data"] = [0, 0, 0, 0]

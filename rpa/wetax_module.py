@@ -10,7 +10,7 @@ import os
 from selenium.common.exceptions import TimeoutException
 
 
-def wetax_officetel(driver, **kwargs):
+def wetax_officetel(driver, kwargs):
     # response 초기화
     response = {
         "response_code": None,
@@ -73,7 +73,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"시도 선택 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -106,7 +106,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"읍면동 선택 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -115,7 +115,7 @@ def wetax_officetel(driver, **kwargs):
     try:
         # 기준연도 선택
         aplcn_yr = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.NAME, "aplcnYr")))
-        Select(aplcn_yr).select_by_index(1)
+        Select(aplcn_yr).select_by_index(0)
         time.sleep(3)
     except TimeoutException:
         response["response_code"] = "90000000"
@@ -123,7 +123,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"기준연도 선택 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -140,7 +140,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"특수번지 선택 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -158,7 +158,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"본번지 입력 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -176,7 +176,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"부번지 입력 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -194,7 +194,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"건물 동 입력 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -212,7 +212,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"건물 호 입력 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -230,7 +230,7 @@ def wetax_officetel(driver, **kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"검색 버튼 클릭 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]
@@ -243,7 +243,7 @@ def wetax_officetel(driver, **kwargs):
         )
         
         # 텍스트 값 가져오기
-        raw_text = span_element.text.strip()  # 예: '82,198,449'
+        raw_text = span_element.text.strip() 
 
         # 쉼표 제거 및 숫자로 변환
         wetax_value = int(raw_text.replace(",", ""))
@@ -254,11 +254,11 @@ def wetax_officetel(driver, **kwargs):
 
     except TimeoutException:
         response["response_code"] = "90000000"
-        response["response_msg"] = "건물시가표준액 요소 찾기 중 타임아웃 발생."
+        response["response_msg"] = "건물시가표준액 찾기 중 타임아웃 발생."
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:
-        e = str(e).split("\\n")[0]
+        e = str(e).split("\n")[0]
         response["response_code"] = "90000001"
         response["response_msg"] = f"건물시가표준액 요소 찾기 중 예외 발생: {e}"
         response["data"] = [0, 0, 0, 0]

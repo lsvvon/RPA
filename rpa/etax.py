@@ -4,13 +4,14 @@ import common_module
 
 
 
-def main(**kwargs):
+def main(dataloop, collected_data):
     driver = None
-
+    
     try:
         driver = common_module.initialize_driver()
-        response = Etax_module.etax_officetel(driver, **kwargs)
-        common_module.screenshot_save(driver)
+        response = Etax_module.etax_officetel(driver, collected_data)
+
+        common_module.screenshot_save(driver, dataloop, collected_data)
 
         return response
     

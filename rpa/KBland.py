@@ -2,17 +2,20 @@ import KBland_module
 import common_module
 
 
-def main(Search_Gobun, **kwargs):
+def main(dataloop, collected_data):
     driver = None
+    
     try:
         driver = common_module.initialize_driver()
-
-        if Search_Gobun == '1': # 지번검색일때
-            response = KBland_module.KBland_streetnum(driver, **kwargs)
-        elif Search_Gobun == '2':   # 도로명검색일때
-            response = KBland_module.KBland_roadnum(driver, **kwargs)
+        for entry in dataloop:
+            Search_Gubun = entry.get("Search_Gubun") 
+        
+        if Search_Gubun == '1': # 지번검색일때
+            response = KBland_module.KBland_streetnum(driver, dataloop, collected_data)
+        elif Search_Gubun == '2':   # 도로명검색일때
+            response = KBland_module.KBland_roadnum(driver, dataloop, collected_data)
             
-        common_module.screenshot_save(driver)
+        common_module.screenshot_save(driver, dataloop, collected_data)
 
         return response
     
