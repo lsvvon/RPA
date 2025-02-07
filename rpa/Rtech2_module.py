@@ -149,7 +149,7 @@ def rtech_app_streetnum(driver, kwargs):
         try:
             for item in result_items:
                 if "검색 결과가 없습니다." in item.text:
-                    response["response_code"] = "90000001"
+                    response["response_code"] = "00000000"
                     response["response_msg"] = "검색 결과가 없습니다. 프로그램을 종료합니다."
                     response["data"] = [0, 0, 0, 0]
                     return response
@@ -240,7 +240,13 @@ def rtech_app_roadnum(driver, kwargs):
         Building_No1 = kwargs.get('Building_No1')
         Building_No2 = kwargs.get('Building_No2')
         Room_No = kwargs.get('Room_No1')
+        Doro_No = kwargs.get('Doro_No1')
         Doro_Name = kwargs.get('Doro_Name1')
+        Doro_No2 = kwargs.get('Doro_No2')
+        if Doro_No2 == '':
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No
+        else:
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No + '-' + Doro_No2
         Chosung = kwargs.get('Chosung1')
 
         url = "https://www.rtech.or.kr/main/mapSearch_mp.do?popUpYn=&posX=37.48243936583027&posY=127.06183029780048#"
@@ -286,7 +292,7 @@ def rtech_app_roadnum(driver, kwargs):
             search_input = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.ID, "searchInput"))
             )
-            search_address = Doro_Name
+            search_address = Doro_Name2
             search_input.send_keys(search_address)
         except TimeoutException:
             response["response_code"] = "90000000"
@@ -326,7 +332,7 @@ def rtech_app_roadnum(driver, kwargs):
         try:
             for item in result_items:
                 if "검색 결과가 없습니다." in item.text:
-                    response["response_code"] = "90000000"
+                    response["response_code"] = "00000000"
                     response["response_msg"] = "검색 결과가 없습니다. 프로그램을 종료합니다."
                     response["data"] = [0, 0, 0, 0]
                     return response
@@ -417,6 +423,7 @@ def captcha_APP(driver, kwargs):
         Room_No = kwargs.get('Room_No1')
         Doro_Name = kwargs.get('Doro_Name1')
         Chosung = kwargs.get('Chosung1')
+        Build_Area = kwargs.get('Build_Area1')
 
         # 팝업창 처리
         try:
@@ -489,7 +496,23 @@ def captcha_APP(driver, kwargs):
             response["response_msg"] = f"호 선택 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
+        
+        # 기준일 가져오기
+        try:
+            lbAptpDt_element = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.ID, "lbAptpDt"))
+            )
 
+            lbAptpDt_text = lbAptpDt_element.text.strip()
+            Base_Date = lbAptpDt_text.replace("시세기준일", "").strip()
+
+        except Exception as e:
+            error = str(e).split("\n")[0]
+            response["response_code"] = "90000001"
+            response["response_msg"] = f"기준일 가져오는 중 예외 발생: {error}"
+            response["data"] = [0, 0, 0, 0]
+            return response
+        
         time.sleep(2)
 
         # 캡차 이미지 처리
@@ -554,23 +577,82 @@ def captcha_APP(driver, kwargs):
 
         time.sleep(5)
 
-        # 하한평균가 가져오기
         try:
-            element_low = WebDriverWait(driver, 20).until(
-                EC.visibility_of_element_located((By.ID, "lower_trade_amt"))
-            )
-            raw_element_low = element_low.text.strip()
-            rtechApp_low_value = int(raw_element_low.replace(",", ""))
-            response["response_code"] = "00000000"
-            response["response_msg"] = "성공적으로 하한평균가를 가져왔습니다."
-            response["data"] = [0, rtechApp_low_value, 0, 0]
+            print("alert 체크 시작")
+            
+            # alert 체크
+            try:
+                alert = WebDriverWait(driver, 5).until(EC.alert_is_present())  # Alert 확인
+                alert.accept()
+                print("Alert이 감지되어 닫음")
+                alert_present = True  # Alert이 감지됨
+            except TimeoutException:
+                print("Alert 없음")
+                alert_present = False  # Alert이 없으면 False 처리
+
+            # Alert이 떴다면
+            if alert_present:
+                size_background = WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located((By.ID, "pyongMarketPriceTitle"))
+                )
+                driver.execute_script("javascript:infotabChange(1);", size_background)
+
+                # 공통적으로 면적을 포함하는 행을 찾음
+                try:
+                    time.sleep(3)
+                    target_row = WebDriverWait(driver, 20).until(
+                        EC.presence_of_element_located(
+                            (By.XPATH, f"//tr[td[normalize-space(text())='{Build_Area}']]")
+                        )
+                    )
+                    # 해당 행의 값들 가져오기
+                    element_low = target_row.find_element(By.XPATH, "./td[@class='table_txt_blue'][1]").text.strip()
+                    element_high = target_row.find_element(By.XPATH, "./td[@class='table_txt_red'][1]").text.strip()
+                    
+
+                    # 쉼표 제거 및 숫자로 변환
+                    rtech_low_value = int(element_low.replace(",", ""))
+                    rtech_high_value = int(element_high.replace(",", ""))
+
+                    response["response_code"] = "00000000"
+                    response["response_msg"] = "정상적으로 처리되었습니다."
+                    response["data"] = [0, rtech_low_value, 0, Base_Date]
+
+                except Exception as e:
+                    error = str(e).split("\n")[0]
+                    response["response_code"] = "90000001"
+                    response["response_msg"] = f"면적 불일치/하한평균가 가져오기 중 예외 발생: {error}"
+                    response["data"] = [0, 0, 0, 0]
+                    return response
+            
+            else: # Alert이 안떴다면
+                try:
+                    element_low = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.ID, "lower_trade_amt"))
+                    )
+
+                    element_low_price = element_low.text.strip()
+                    # 쉼표 제거 및 숫자로 변환
+                    rtech_low_value = int(element_low_price.replace(",", ""))
+
+                    response["response_code"] = "00000000"
+                    response["response_msg"] = "정상적으로 처리되었습니다."
+                    response["data"] = [0, rtech_low_value, 0, Base_Date]
+                except Exception as e:
+                    error = str(e).split("\n")[0]
+                    response["response_code"] = "90000001"
+                    response["response_msg"] = f"하한평균가 가져오기 중 예외 발생: {error}"
+                    response["data"] = [0, 0, 0, 0]
+                    return response
+            return response
+        
         except Exception as e:
             error = str(e).split("\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = f"하한평균가 가져오기 중 예외 발생: {error}"
+            response["response_msg"] = f"예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
-
+ 
     except Exception as e:
         error = str(e).split("\n")[0]
         response["response_code"] = "90000001"
@@ -578,6 +660,6 @@ def captcha_APP(driver, kwargs):
         response["data"] = [0, 0, 0, 0]
         return response
 
-    return response
+  
 
    

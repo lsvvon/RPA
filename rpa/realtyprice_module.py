@@ -236,7 +236,13 @@ def realtyprice_apt_roadnum(driver, kwargs):
         Building_No1 = kwargs.get('Building_No1')
         Building_No2 = kwargs.get('Building_No2')
         Room_No = kwargs.get('Room_No1')
+        Doro_No = kwargs.get('Doro_No1')
         Doro_Name = kwargs.get('Doro_Name1')
+        Doro_No2 = kwargs.get('Doro_No2')
+        if Doro_No2 == '':
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No
+        else:
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No + '-' + Doro_No2
         Chosung = kwargs.get('Chosung1')
 
         url = "https://www.realtyprice.kr/notice/main/mainBody.htm"
@@ -309,7 +315,7 @@ def realtyprice_apt_roadnum(driver, kwargs):
                 EC.element_to_be_clickable((By.ID, 'sigungu'))
             )
             select_1 = Select(sgg_list)
-            select_1.select_by_visible_text(Sigungu2)
+            select_1.select_by_visible_text(Sigungu)
 
             time.sleep(3)
             eub_list = WebDriverWait(driver, 20).until(
@@ -324,6 +330,14 @@ def realtyprice_apt_roadnum(driver, kwargs):
             )
             select_3 = Select(road_list)
             select_3.select_by_visible_text(Doro_Name)
+
+        except Exception as e:
+            e = str(e).split("\n")[0]
+            response["response_code"] = "90000001"
+            response["response_msg"] = f"주소 검색 중 예외 발생: {e}"
+            response["data"] = [0, 0, 0, 0]
+            return response
+
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "주소 선택 중 타임아웃 발생"
@@ -341,6 +355,12 @@ def realtyprice_apt_roadnum(driver, kwargs):
                 if Building_Name in option.text:  # Building_Name이 포함된 텍스트를 찾음
                     select_4.select_by_visible_text(option.text)
                     break
+        except Exception as e:
+            e = str(e).split("\n")[0]
+            response["response_code"] = "90000001"
+            response["response_msg"] = f"단지명 선택 중 예외 발생: {e}"
+            response["data"] = [0, 0, 0, 0]
+            return response
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "단지명 선택 중 타임아웃 발생"
@@ -359,13 +379,19 @@ def realtyprice_apt_roadnum(driver, kwargs):
                 select_4.select_by_index(0)  # 첫 번째 값 선택
             else:
                 select_4.select_by_visible_text(Building_No1)  # Building_No1 값 선택
-        
+            time.sleep(3)
             # 호 클릭
             ho = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.ID, 'ho'))
             )
             select_5 = Select(ho)
             select_5.select_by_visible_text(Room_No)
+        except Exception as e:
+            e = str(e).split("\n")[0]
+            response["response_code"] = "90000001"
+            response["response_msg"] = f"동/호 선택 중 예외 발생: {e}"
+            response["data"] = [0, 0, 0, 0]
+            return response
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "동/호 선택 중 타임아웃 발생"
@@ -636,7 +662,14 @@ def realtyprice_individual_roadnum(driver, kwargs):
         Building_No1 = kwargs.get('Building_No1')
         Building_No2 = kwargs.get('Building_No2')
         Room_No = kwargs.get('Room_No1')
+        Doro_No = kwargs.get('Doro_No1')
+        Doro_No2 = kwargs.get('Doro_No2')
         Doro_Name = kwargs.get('Doro_Name1')
+        Doro_No2 = kwargs.get('Doro_No2')
+        if Doro_No2 == '':
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No
+        else:
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No + '-' + Doro_No2
         Chosung = kwargs.get('Chosung1')
 
         url = "https://www.realtyprice.kr/notice/main/mainBody.htm"
@@ -712,7 +745,7 @@ def realtyprice_individual_roadnum(driver, kwargs):
                 EC.element_to_be_clickable((By.ID, 'sigungu'))
             )
             select_1 = Select(sgg_list)
-            select_1.select_by_visible_text(Sigungu2)
+            select_1.select_by_visible_text(Sigungu)
 
             time.sleep(3)
             eub_list = WebDriverWait(driver, 20).until(
@@ -728,6 +761,13 @@ def realtyprice_individual_roadnum(driver, kwargs):
             select_3 = Select(road_list)
             select_3.select_by_visible_text(Doro_Name)
 
+        except Exception as e:
+            e = str(e).split("\n")[0]
+            response["response_code"] = "90000001"
+            response["response_msg"] = f"주소 검색 중 예외 발생: {e}"
+            response["data"] = [0, 0, 0, 0]
+            return response
+
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "주소 선택 중 타임아웃 발생"
@@ -736,19 +776,19 @@ def realtyprice_individual_roadnum(driver, kwargs):
         time.sleep(3)
 
         try:
-            # 건물번호 입력
+            # 건물번호 -> 도로명 번호로 입력
             bun1 = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.XPATH, "//input[@name='build_bun1' and @class='text3 input_number_only']"))
             )
             driver.execute_script("arguments[0].click();", bun1)
-            bun1.send_keys(Building_No1)
+            bun1.send_keys(Doro_No)
 
-            time.sleep(3)
             bun2 = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.XPATH, "//input[@name='build_bun2' and @class='text3 input_number_only']"))
             )
             driver.execute_script("arguments[0].click();", bun2)
-            bun2.send_keys(Building_No2)
+            bun2.send_keys(Doro_No2)
+
 
             time.sleep(3)
             # 검색 클릭            
@@ -765,18 +805,14 @@ def realtyprice_individual_roadnum(driver, kwargs):
         time.sleep(3)
 
         try:
-            # XPath를 사용해 <tr> 태그 내부의 마지막 <td> 값(개별주택가격)을 가져옴
             element = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.XPATH, "//tr/td[last()]"))
             )
-            
-            # 텍스트 추출
+
             raw_text = element.text.strip()
-            print(f"Raw value: {raw_text}")  # 예: '811,000,000'
             
             # 쉼표 제거 및 숫자로 변환
             realty_value = int(raw_text.replace(",", ""))
-            print(f"Numeric value: {realty_value}")  # 예: 811000000
             
             # 대지면적(산정정)
             area_element = WebDriverWait(driver, 20).until(
@@ -950,14 +986,12 @@ def realtyprice_land_streetnum(driver, kwargs):
         time.sleep(3)
 
         try:
-            # XPath를 사용해 <tr> 태그 내부의 마지막 <td> 값(개별주택가격)을 가져옴
             element = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.XPATH, "//tr/td[4]"))
             )
-            
-            # 텍스트 값 가져오기
-            raw_text = element.text.strip()  # '4,218,000 원/㎡' 형태
-            
+
+            raw_text = element.text.strip() 
+
             # 쉼표와 단위 제거 및 숫자로 변환
             realty_land_value = int(raw_text.replace(",", "").split(" ")[0])  # 쉼표 제거 후 '원/㎡' 분리
             response["response_code"] = "00000000"
@@ -1001,7 +1035,14 @@ def realtyprice_land_roadnum(driver, kwargs):
         Building_No1 = kwargs.get('Building_No1')
         Building_No2 = kwargs.get('Building_No2')
         Room_No = kwargs.get('Room_No1')
+        Doro_No = kwargs.get('Doro_No1')
+        Doro_No2 = kwargs.get('Doro_No2')
         Doro_Name = kwargs.get('Doro_Name1')
+        Doro_No2 = kwargs.get('Doro_No2')
+        if Doro_No2 == '':
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No
+        else:
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No + '-' + Doro_No2
         Chosung = kwargs.get('Chosung1')
 
         url = "https://www.realtyprice.kr/notice/main/mainBody.htm"
@@ -1102,19 +1143,20 @@ def realtyprice_land_roadnum(driver, kwargs):
         time.sleep(3)
 
         try:
-            # 건물번호
+            # 건물번호 -> 도로명 번호로 입력
             bun1 = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.XPATH, "//input[@name='build_bun1' and @class='text3 input_number_only']"))
             )
             driver.execute_script("arguments[0].click();", bun1)
-            bun1.send_keys(Building_No1)
+            bun1.send_keys(Doro_No)
 
-            time.sleep(3)
             bun2 = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.XPATH, "//input[@name='build_bun2' and @class='text3 input_number_only']"))
             )
             driver.execute_script("arguments[0].click();", bun2)
-            bun2.send_keys(Building_No2)
+            bun2.send_keys(Doro_No2)
+
+            time.sleep(3)
             
             # '검색' 버튼 가져오기
             search_button = WebDriverWait(driver, 20).until(
@@ -1132,13 +1174,10 @@ def realtyprice_land_roadnum(driver, kwargs):
         time.sleep(3)
 
         try:
-            # XPath를 사용해 <tr> 태그 내부의 마지막 <td> 값(개별주택가격)을 가져옴
             element = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.XPATH, "//tr/td[4]"))
             )
-            
-            # 텍스트 값 가져오기
-            raw_text = element.text.strip()  # '4,218,000 원/㎡' 형태
+            raw_text = element.text.strip()
             
             # 쉼표와 단위 제거 및 숫자로 변환
             realty_land_value = int(raw_text.replace(",", "").split(" ")[0])  # 쉼표 제거 후 '원/㎡' 분리

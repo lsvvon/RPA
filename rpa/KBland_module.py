@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 import time
 import re
+import difflib
 
 # 지번 검색
 def KBland_streetnum(driver, dataloop, kwargs):
@@ -14,14 +15,6 @@ def KBland_streetnum(driver, dataloop, kwargs):
         "response_msg": None,
         "data": None,
     }
-
-    for entry in dataloop:
-        Estate_Gubun = entry.get("Estate_Gubun") 
-
-    if Estate_Gubun == '1':
-        Estate_Name = '아파트'
-    elif Estate_Gubun == '4':
-        Estate_Name = '오피스텔'
 
     try:
         # 주소 값 가져오기
@@ -177,7 +170,7 @@ def KBland_streetnum(driver, dataloop, kwargs):
 
             if driver.find_elements(By.CSS_SELECTOR, ".nodata"):
                 nodata_message = driver.find_element(By.CSS_SELECTOR, ".nodata").text.strip()
-                response["response_code"] = "90000000"
+                response["response_code"] = "00000000"
                 response["response_msg"] = f"검색 결과가 없습니다: {nodata_message}"
                 response["data"] = [0, 0, 0, 0]
                 return response
@@ -195,7 +188,7 @@ def KBland_streetnum(driver, dataloop, kwargs):
                     if Building_Name in name_text:
                         name_element.click()
                         return proceed_with_area_selection(driver, Build_Area, response)
-
+               
                 return proceed_with_area_selection(driver, Build_Area, response)
         except TimeoutException:
             response["response_code"] = "90000000"
@@ -236,11 +229,17 @@ def KBland_roadnum(driver, dataloop, kwargs):
         Building_No1 = kwargs.get('Building_No1')
         Building_No2 = kwargs.get('Building_No2')
         Room_No = kwargs.get('Room_No1')
-        Doro_Name = kwargs.get('Doro_Name1')
+        Doro_No = kwargs.get('Doro_No1')
+        Doro_No2 = kwargs.get('Doro_No2')
+        if Doro_No2 == '':
+            Doro_Name = kwargs.get('Doro_Name1') + ' ' + Doro_No
+        else:
+            Doro_Name = kwargs.get('Doro_Name1') + ' ' + Doro_No + '-' + Doro_No2
         Chosung = kwargs.get('Chosung1')
         Build_Area = kwargs.get('Build_Area1')
 
-        url = "https://kbland.kr/map?xy=37.5205559,126.9265729,17"
+
+        url = "https://kbland.kr/home"
         driver.get(url)
 
         # 팝업창 종료
@@ -278,9 +277,10 @@ def KBland_roadnum(driver, dataloop, kwargs):
                 EC.visibility_of_element_located((By.CSS_SELECTOR, ".form-control"))
             )
             input_element.send_keys(Doro_Name)
+            time.sleep(2)
             input_element.send_keys(Keys.ENTER)
 
-            time.sleep(3)
+            time.sleep(5)
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "주소 입력 중 타임아웃 발생."
@@ -396,7 +396,7 @@ def KBland_roadnum(driver, dataloop, kwargs):
             # '검색결과가 없어요.' 메시지가 있는지 확인
             if driver.find_elements(By.CSS_SELECTOR, ".nodata"):
                 nodata_message = driver.find_element(By.CSS_SELECTOR, ".nodata").text.strip()
-                response["response_code"] = "90000001"
+                response["response_code"] = "00000000"
                 response["response_msg"] = f"검색 결과가 없습니다: {nodata_message}"
                 response["data"] = [0, 0, 0, 0]
                 return response
@@ -405,11 +405,9 @@ def KBland_roadnum(driver, dataloop, kwargs):
             items = driver.find_elements(By.CSS_SELECTOR, ".item-search-poi")
 
             if driver.find_elements(By.CSS_SELECTOR, ".widthTypeValue"):
-                print("검색 결과가 1개만 존재하여 바로 면적 선택으로 진행합니다.")
                 return proceed_with_area_selection(driver)  # 면적 선택 진행
             
             # 검색 결과가 여러 개인 경우: .item-search-poi 리스트가 나타남
-            items = driver.find_elements(By.CSS_SELECTOR, ".item-search-poi")
             if items:
                 print(f"검색 결과가 {len(items)}개 있습니다. 리스트에서 선택을 진행합니다.")
                 found_item = False  # Building_Name 찾았는지 확인하는 플래그
@@ -418,7 +416,6 @@ def KBland_roadnum(driver, dataloop, kwargs):
                     name_text = name_element.text.strip()
 
                     if Building_Name in name_text:
-                        print(f"'{Building_Name}' 항목을 찾았습니다.")
                         name_element.click()
                         found_item = True
                         return proceed_with_area_selection(driver)

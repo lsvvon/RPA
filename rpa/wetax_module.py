@@ -242,7 +242,6 @@ def wetax_officetel(driver, kwargs):
             EC.visibility_of_element_located((By.XPATH, "//td[@class='a-r']/span[@class='roboto']"))
         )
         
-        # 텍스트 값 가져오기
         raw_text = span_element.text.strip() 
 
         # 쉼표 제거 및 숫자로 변환

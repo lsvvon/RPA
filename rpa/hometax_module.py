@@ -202,7 +202,7 @@ def hometax_streetnum(driver, kwargs):
                         driver.execute_script("arguments[0].scrollIntoView();", item)
                         item.click()
                         break
-                    response["response_code"] = "90000001"
+                    response["response_code"] = "00000000"
                     response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
                     response["data"] = [0, 0, 0, 0]
                 else:
@@ -214,7 +214,7 @@ def hometax_streetnum(driver, kwargs):
 
             else:
                 # Building_Name을 포함한 항목을 찾지 못한 경우
-                response["response_code"] = "90000001"
+                response["response_code"] = "00000000"
                 response["response_msg"] = f"목표 항목 '{Building_Name + Building_No1}'를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
@@ -351,7 +351,13 @@ def hometax_roadnum(driver, kwargs):
         Building_No1 = kwargs.get('Building_No1')
         Building_No2 = kwargs.get('Building_No2')
         Room_No = kwargs.get('Room_No1')
+        Doro_No = kwargs.get('Doro_No1')
         Doro_Name = kwargs.get('Doro_Name1')
+        Doro_No2 = kwargs.get('Doro_No2')
+        if Doro_No2 == '':
+            Doro_Name2 = kwargs.get('Doro_Name1') + '' + Doro_No
+        else:
+            Doro_Name2 = kwargs.get('Doro_Name1') + '' + Doro_No + '-' + Doro_No2
         Chosung = kwargs.get('Chosung1')
         Floor = kwargs.get('Floor1')
 
@@ -449,40 +455,69 @@ def hometax_roadnum(driver, kwargs):
             response["data"] = [0, 0, 0, 0]
             return response 
         
-        # 해당 물건지 찾기
+        # 해당 도로명 주소 찾기
         try:
-            # 모든 표시된 `txtRdNmItm0` 요소 찾기
-            visible_items = WebDriverWait(driver, 20).until(
-                EC.presence_of_all_elements_located(
-                    (By.XPATH, "//li[not(contains(@style, 'display: none;'))]//a[starts-with(@id, 'txtRdNmItm')]")
-                )
+            
+            # 페이지 값 가져오기 
+            mf_txppWframe_txtTotalPage0= WebDriverWait(driver, 20).until(
+                EC.visibility_of_element_located((By.ID, "mf_txppWframe_txtTotalPage0"))
             )
+            txtTotalPage0 = mf_txppWframe_txtTotalPage0.get_attribute("innerText").strip()
+            #print(f"총 페이지 수: {txtTotalPage0}")
+            time.sleep(2)
 
-            # 각 요소의 텍스트 확인
-            for item in visible_items:
-                item_text = item.text.strip()
+            # 해당 물건지 찾았는지 상태값
+            FindFlag = False
+            # 페이지 개수만큼 반복
+            for page in range(1, int(txtTotalPage0) + 1):
+                # 모든 표시된 `txtRdNmItm0` 요소 찾기
+                visible_items = WebDriverWait(driver, 20).until(
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, "//li[not(contains(@style, 'display: none;'))]//a[starts-with(@id, 'txtRdNmItm')]")
+                    )
+                )
+             
+                time.sleep(2)
 
-                if Doro_Name in item_text:
-                    print(f"목표 항목 '{Doro_Name}'를 찾았습니다. 클릭합니다.")
-                    driver.execute_script("arguments[0].scrollIntoView();", item)
-                    item.click()
-                    break
-                
-                response["response_code"] = "90000001"
-                response["response_msg"] = f"목표 항목 '{Doro_Name}'를 찾지 못했습니다."
+                # 각 요소의 텍스트 확인
+                for item in visible_items:
+                    item = item.text.strip()    
+                    #print(item)
+
+                    if Ridong in item and Doro_Name in item:
+                        FindFlag = True
+                        print(f"목표 항목 '{Ridong}'를 찾았습니다. 클릭합니다.")
+                        # 해당 항목을 찾음
+                        target_element = WebDriverWait(driver, 10).until(
+                            EC.element_to_be_clickable((By.XPATH, f"//a[contains(text(), '{item}')]"))
+                        )
+                        target_element.click()
+                        break                
+           
+                # 페이징 클릭
+                if not FindFlag:                
+                    next_page_button = WebDriverWait(driver, 20).until(
+                        EC.element_to_be_clickable((By.ID, f"mf_txppWframe_pglNavi0_page_{page+1}"))
+                    )
+                    driver.execute_script("arguments[0].click();", next_page_button)
+                    time.sleep(2) 
+
+            if not FindFlag:                
+                response["response_code"] = "00000000"
+                response["response_msg"] = f"목표 항목 '{Ridong, Doro_Name}'를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response 
-            
+    
         except Exception as e:
             e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
-            response["response_msg"] = "해당 물건지 찾기 오류 발생."
+            response["response_msg"] = "해당 물건지 찾기 오류 발생." + e
             response["data"] = [0, 0, 0, 0]
             return response 
 
         time.sleep(3)
 
-        # 해당 오피스텔 클릭
+        # 해당 건물명 클릭
         try:
             # 모든 표시된 `txtItm` 요소 찾기
             visible_items = WebDriverWait(driver, 20).until(
@@ -511,7 +546,7 @@ def hometax_roadnum(driver, kwargs):
                         driver.execute_script("arguments[0].scrollIntoView();", item)
                         item.click()
                         break
-                    response["response_code"] = "90000001"
+                    response["response_code"] = "00000000"
                     response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
                     response["data"] = [0, 0, 0, 0]
                 else:
@@ -523,7 +558,7 @@ def hometax_roadnum(driver, kwargs):
 
             else:
                 # Building_Name을 포함한 항목을 찾지 못한 경우
-                response["response_code"] = "90000001"
+                response["response_code"] = "00000000"
                 response["response_msg"] = f"목표 항목 '{Building_Name + Building_No1}'를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
@@ -613,15 +648,15 @@ def hometax_roadnum(driver, kwargs):
             price_element = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.XPATH, "//td[@data-col_id='notcPrc']/nobr"))
             )
-            raw_price = price_element.text.strip()  # '4,761,000'
+            raw_price = price_element.text.strip()
             hometax_price_value = int(raw_price.replace(",", ""))  # 쉼표 제거 후 숫자로 변환
 
             # 2. 건물면적적
             size_element = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.XPATH, "//td[@data-col_id='bldTotaSfl']/nobr"))
             )
-            raw_size = size_element.text.strip()  # '36.4'
-            hometax_size_value = float(raw_size)  # 실수로 변환
+            raw_size = size_element.text.strip()  
+            hometax_size_value = float(raw_size) 
 
             # 기준일
             date_element = WebDriverWait(driver, 20).until(

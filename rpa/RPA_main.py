@@ -14,6 +14,12 @@ import Rtech1
 import Rtech2
 import Wetax
 import os
+from dotenv import load_dotenv
+
+# .env 파일 활성화
+load_dotenv()
+AppKey = os.getenv('AppKey')
+AppSecretKey = os.getenv('AppSecretKey')
 
 # 드라이버 초기화
 chrome_options = Options()
@@ -21,6 +27,7 @@ chrome_options.add_argument("--ignore-certificate-errors")
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
+
 
 driver = common_module.initialize_driver()
 url = "https://bizssl.shinhanci.co.kr/SHSCHER/Asp/RPA/CA_RPA_Condition.asp"
@@ -43,6 +50,8 @@ elements_to_find = [
     (By.ID, "Building_No2", "Building_No2"),
     (By.ID, "Room_No1", "Room_No1"),
     (By.ID, "Doro_Name1", "Doro_Name1"),
+    (By.ID, "Doro_No1", "Doro_No1"),
+    (By.ID, "Doro_No2", "Doro_No2"),
     (By.ID, "Chosung1", "Chosung1"),
     (By.ID, "Build_Area1", "Build_Area1"),
     (By.ID, "Lease_Inv_Mng_No1", "Lease_Inv_Mng_No1"),
@@ -123,7 +132,7 @@ module_mapping = {
 }
 
 def data_insert(result, i):
-    
+    print(result)
     if i == 1:
         i = ''
 
@@ -163,10 +172,7 @@ def data_insert(result, i):
 
 # 첨부 파일 처리
 def file_attach(dataloop, collected_data, i):    
-    # file_name = "5000000000_901.png"  # 업로드하려는 파일 이름
     folder_path = r"C:\python\RPA\rpa\capImg"  # capImg 폴더의 절대 경로
-    # file_path = os.path.join(folder_path, file_name)
-
     Lease_Inv_Mng_No = collected_data.get('Lease_Inv_Mng_No1')
        
     for entry in dataloop:
@@ -217,21 +223,22 @@ def main(data):
         print(f"{ticker} 실행 중...")
 
         # 우선순위 정상처리되면 종료한다.
-        if KBland_ResCode == '00000000' and Rtech_ResCode == '00000000':
+        if KBland_ResCode == '00000000' or Rtech_ResCode == '00000000':
             break
         if Etc_ResCode == '00000000':     
             break
         
         try:
             if ticker in module_mapping:
-                if ticker == "Rtech2":
-                    result = module_mapping[ticker](
-                    dataloop,
-                    collected_data
-                )                    
+                # if ticker == "Rtech":
+                result = module_mapping[ticker](
+                            dataloop,
+                            collected_data
+                        )                    
 
-                # if ticker == 'KBLand':
-                #     KBland_ResCode = result['response_code']
+
+                # if ticker == 'Rtech':
+                #     KBland_ResCode = respsult['response_code']
                 # elif ticker == 'Rtech':
                 #     Rtech_ResCode = result['response_code']
                 # else: 

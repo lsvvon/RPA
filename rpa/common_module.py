@@ -31,18 +31,6 @@ def screenshot_save(driver, dataloop, kwargs):
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        # 현재 폴더에 존재하는 파일들에서 최대 SEQ 번호 추출
-        #existing_files = os.listdir(folder_path)
-        #seq_numbers = []
-        
-        #for file in existing_files:
-        #    match = re.search(rf"{Lease_Inv_Mng_No}_(\d+)\.png", file)
-        #    if match:
-        #        seq_numbers.append(int(match.group(1)))
-
-        # 최대 번호 + 1로 새로운 seq 번호 생성
-        #next_seq = max(seq_numbers) + 1 if seq_numbers else 701  # 시작 번호는 701
-
         # 파일 경로 설정
         next_seq = "70" + Rank
         screenshot_name = f"{Lease_Inv_Mng_No}_{next_seq}.png"
@@ -56,7 +44,7 @@ def screenshot_save(driver, dataloop, kwargs):
         except Exception as e:
             print(f"스크린샷 저장 중 오류 발생: {e}")
 
-        time.sleep(10)
+        time.sleep(7)
 
     except Exception as e:
         e = str(e).split("\n")[0]

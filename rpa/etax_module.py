@@ -213,7 +213,7 @@ def etax_officetel(driver, kwargs):
             )
             
             # 텍스트 값 추출
-            raw_text = td_element.text.strip()  # '69,767,826 원' 형태
+            raw_text = td_element.text.strip()
             # 쉼표와 단위 제거 및 숫자 변환
             etax_value = int(raw_text.replace(",", "").replace(" 원", ""))
             response["response_code"] = "00000000"
