@@ -21,7 +21,7 @@ load_dotenv()
 AppKey = os.getenv('AppKey')
 AppSecretKey = os.getenv('AppSecretKey')
 
-# 드라이버 초기화
+# 드라이버 옵션 설정
 chrome_options = Options()
 chrome_options.add_argument("--ignore-certificate-errors")
 chrome_options.add_argument("--headless")
@@ -29,109 +29,7 @@ chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 
 
-driver = common_module.initialize_driver()
-url = "https://bizssl.shinhanci.co.kr/SHSCHER/Asp/RPA/CA_RPA_Condition.asp"
-driver.get(url)
-#print("RPA_main.driver: ", driver)
-time.sleep(5)
-
-# 수집할 요소 정의
-elements_to_find = [
-    (By.ID, "Search_Gubun1", "Search_Gubun1"),
-    (By.ID, "Estate_Gubun1", "Estate_Gubun1"),
-    (By.ID, "Sido1", "Sido1"),
-    (By.ID, "Sigungu1", "Sigungu1"),
-    (By.ID, "Sigungu2", "Sigungu2"),
-    (By.ID, "Ridong1", "Ridong1"),
-    (By.ID, "Jibun_No1", "Jibun_No1"),
-    (By.ID, "Jibun_No2", "Jibun_No2"),
-    (By.ID, "Building_Name1", "Building_Name1"),
-    (By.ID, "Building_No1", "Building_No1"),
-    (By.ID, "Building_No2", "Building_No2"),
-    (By.ID, "Room_No1", "Room_No1"),
-    (By.ID, "Doro_Name1", "Doro_Name1"),
-    (By.ID, "Doro_No1", "Doro_No1"),
-    (By.ID, "Doro_No2", "Doro_No2"),
-    (By.ID, "Chosung1", "Chosung1"),
-    (By.ID, "Build_Area1", "Build_Area1"),
-    (By.ID, "Lease_Inv_Mng_No1", "Lease_Inv_Mng_No1"),
-    (By.ID, "Floor1", "Floor1"),
-    (By.ID, "Ticker", "Ticker"),
-    (By.ID, "Ticker2", "Ticker2"),
-    (By.ID, "Ticker3", "Ticker3"),
-    (By.ID, "Ticker4", "Ticker4"),
-    (By.ID, "Ticker5", "Ticker5"),
-    (By.ID, "Ticker6", "Ticker6"),
-    (By.ID, "addResch", "addResch"),
-    (By.ID, "addResch2", "addResch2"),
-    (By.ID, "addResch3", "addResch3"),
-    (By.ID, "addResch4", "addResch4"),
-    (By.ID, "addResch5", "addResch5"),
-    (By.ID, "addResch6", "addResch6"),
-    (By.ID, "Rank_No", "Rank_No"),
-    (By.ID, "Rank_No2", "Rank_No2"),
-    (By.ID, "Rank_No3", "Rank_No3"),
-    (By.ID, "Rank_No4", "Rank_No4"),
-    (By.ID, "Rank_No5", "Rank_No5"),
-    (By.ID, "Rank_No6", "Rank_No6"),
-
-]
-
-# 수집된 데이터 저장
-collected_data = {}
-
-# 요소 값 수집
-for by, value, description in elements_to_find:
-    try:
-        element = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((by, value))
-        )
-        value_attribute = element.get_attribute("value").strip() if element.get_attribute("value") else ""
-        collected_data[description] = value_attribute
-    except Exception as e:
-        print(f"{description} 요소를 찾을 수 없습니다:", e)
-        collected_data[description] = "오류 발생"
-
-# print("collected_data", collected_data)
-
-# ticker와 addResch를 순서대로 매핑하여 데이터 수집
-tickers = ["Ticker", "Ticker2", "Ticker3", "Ticker4", "Ticker5", "Ticker6"]
-add_reschs = ["addResch", "addResch2", "addResch3", "addResch4", "addResch5", "addResch6"]
-ranks = ["Rank_No", "Rank_No2", "Rank_No3", "Rank_No4", "Rank_No5", "Rank_No6"]
-data = []
-dataloop = []
-
-for ticker_key, add_resch_key, rank_key in zip(tickers, add_reschs, ranks):
-    ticker_value = collected_data.get(ticker_key)
-    rank_value = collected_data.get(rank_key)
-    if ticker_value and ticker_value != "":
-        entry = {
-            "Ticker": ticker_value,
-            "Rank": rank_value,
-            "addResch": collected_data.get(add_resch_key, "기본값"),
-            "Search_Gubun": collected_data.get("Search_Gubun1"),
-            "Estate_Gubun": collected_data.get("Estate_Gubun1")
-        }
-        data.append(entry)
-
-# 확인용 출력
-# print(data)
-
-
-# 실행 가능한 모듈과 해당 메인 함수의 매핑
-module_mapping = {
-    "Etax": lambda dataloop, kwargs: Etax.main(dataloop, kwargs),
-    "Wetax": lambda dataloop, kwargs: Wetax.main(dataloop, kwargs),
-    "Hometax": lambda dataloop, kwargs: Hometax.main(dataloop, kwargs),
-    "KBLand": lambda dataloop, kwargs: KBland.main(dataloop, kwargs),
-    "Realty1": lambda dataloop, kwargs: Realty1.main(dataloop, kwargs),
-    "Realty2": lambda dataloop, kwargs: Realty2.main(dataloop, kwargs),
-    "Realty3": lambda dataloop, kwargs: Realty3.main(dataloop, kwargs),
-    "Rtech": lambda dataloop, kwargs: Rtech1.main(dataloop, kwargs),
-    "Rtech2": lambda dataloop, kwargs: Rtech2.main(dataloop, kwargs),  
-}
-
-def data_insert(result, i):
+def data_insert(result, i, num):
     print(result)
     if i == 1:
         i = ''
@@ -167,6 +65,29 @@ def data_insert(result, i):
         )
         Base_Date.send_keys(result['data'][3] if result['data'][3] is not None else '')
 
+        if i == num:
+            time.sleep(1)
+            Response_Code1 = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "Response_Code1"))
+            )
+            Response_Msg1 = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "Response_Msg1"))
+            )
+            time.sleep(1)
+            response_code_input = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.ID, "Response_Code" + str(num)))
+            )
+            response_value = response_code_input.get_attribute('value')
+
+            # rpa 성공 여부 판단
+            if response_value:
+                Response_Code1.send_keys("00000000")
+                Response_Msg1.send_keys("RPA 정상적으로 처리되었습니다.")
+                print("✅ RPA 실행 성공!")
+            else:
+                Response_Code1.send_keys("90000000")
+                Response_Msg1.send_keys("RPA 처리 중 오류가 발생하였습니다.")
+                print("❌ RPA 실행 실패!")
     else:
         print("main data insert 결과를 사용할 수 없습니다.")
 
@@ -193,80 +114,200 @@ def file_attach(dataloop, collected_data, i):
         EC.presence_of_element_located((By.ID, "txtFile" + str(i)))
     )
     txtFile_capImg.send_keys(file_path)
- 
 
-def main(data):
-    result = None
-    i = 1
-    KBland_ResCode = ''
-    Rtech_ResCode = ''
-    Etc_ResCode = ''
+# 반복 실행을 위한 while루프
+while True:
+    try:
+        driver = common_module.initialize_driver()
+        url = "https://bizssl.shinhanci.co.kr/SHSCHER/Asp/RPA/CA_RPA_Condition.asp"
+        driver.get(url)
+        #print("RPA_main.driver: ", driver)
+        time.sleep(5)
 
-    # 데이터를 Ticker 순서대로 처리
-    for entry in data:
-        ticker = entry["Ticker"]
-        addResch = entry["addResch"]
-        rank = entry["Rank"]
-        Search_Gubun = entry["Search_Gubun"]
-        Estate_Gubun = entry["Estate_Gubun"]
+        # 수집할 요소 정의
+        elements_to_find = [
+            (By.ID, "Search_Gubun1", "Search_Gubun1"),
+            (By.ID, "Estate_Gubun1", "Estate_Gubun1"),
+            (By.ID, "Sido1", "Sido1"),
+            (By.ID, "Sigungu1", "Sigungu1"),
+            (By.ID, "Sigungu2", "Sigungu2"),
+            (By.ID, "Ridong1", "Ridong1"),
+            (By.ID, "Jibun_No1", "Jibun_No1"),
+            (By.ID, "Jibun_No2", "Jibun_No2"),
+            (By.ID, "Building_Name1", "Building_Name1"),
+            (By.ID, "Building_No1", "Building_No1"),
+            (By.ID, "Building_No2", "Building_No2"),
+            (By.ID, "Room_No1", "Room_No1"),
+            (By.ID, "Doro_Name1", "Doro_Name1"),
+            (By.ID, "Doro_No1", "Doro_No1"),
+            (By.ID, "Doro_No2", "Doro_No2"),
+            (By.ID, "Chosung1", "Chosung1"),
+            (By.ID, "Build_Area1", "Build_Area1"),
+            (By.ID, "Lease_Inv_Mng_No1", "Lease_Inv_Mng_No1"),
+            (By.ID, "Floor1", "Floor1"),
+            (By.ID, "Ticker", "Ticker"),
+            (By.ID, "Ticker2", "Ticker2"),
+            (By.ID, "Ticker3", "Ticker3"),
+            (By.ID, "Ticker4", "Ticker4"),
+            (By.ID, "Ticker5", "Ticker5"),
+            (By.ID, "Ticker6", "Ticker6"),
+            (By.ID, "addResch", "addResch"),
+            (By.ID, "addResch2", "addResch2"),
+            (By.ID, "addResch3", "addResch3"),
+            (By.ID, "addResch4", "addResch4"),
+            (By.ID, "addResch5", "addResch5"),
+            (By.ID, "addResch6", "addResch6"),
+            (By.ID, "Rank_No", "Rank_No"),
+            (By.ID, "Rank_No2", "Rank_No2"),
+            (By.ID, "Rank_No3", "Rank_No3"),
+            (By.ID, "Rank_No4", "Rank_No4"),
+            (By.ID, "Rank_No5", "Rank_No5"),
+            (By.ID, "Rank_No6", "Rank_No6"),
 
+        ]
+
+        # 수집된 데이터 저장
+        collected_data = {}
+
+        # 요소 값 수집
+        for by, value, description in elements_to_find:
+            try:
+                element = WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located((by, value))
+                )
+                value_attribute = element.get_attribute("value").strip() if element.get_attribute("value") else ""
+                collected_data[description] = value_attribute
+            except Exception as e:
+                print(f"{description} 요소를 찾을 수 없습니다:", e)
+                collected_data[description] = "오류 발생"
+
+        # print("collected_data", collected_data)
+
+        # ticker와 addResch를 순서대로 매핑하여 데이터 수집
+        tickers = ["Ticker", "Ticker2", "Ticker3", "Ticker4", "Ticker5", "Ticker6"]
+        add_reschs = ["addResch", "addResch2", "addResch3", "addResch4", "addResch5", "addResch6"]
+        ranks = ["Rank_No", "Rank_No2", "Rank_No3", "Rank_No4", "Rank_No5", "Rank_No6"]
+        data = []
         dataloop = []
-        entry2 = {
-            "Ticker": ticker,
-            "Rank": rank,
-            "addResch": addResch,
-            "Search_Gubun": Search_Gubun,
-            "Estate_Gubun": Estate_Gubun
+
+        for ticker_key, add_resch_key, rank_key in zip(tickers, add_reschs, ranks):
+            ticker_value = collected_data.get(ticker_key)
+            rank_value = collected_data.get(rank_key)
+            if ticker_value and ticker_value != "":
+                entry = {
+                    "Ticker": ticker_value,
+                    "Rank": rank_value,
+                    "addResch": collected_data.get(add_resch_key, "기본값"),
+                    "Search_Gubun": collected_data.get("Search_Gubun1"),
+                    "Estate_Gubun": collected_data.get("Estate_Gubun1")
+                }
+                data.append(entry)
+
+        # 확인용 출력
+        # print(data)
+
+
+        # 실행 가능한 모듈과 해당 메인 함수의 매핑
+        module_mapping = {
+            "Etax": lambda dataloop, kwargs: Etax.main(dataloop, kwargs),
+            "Wetax": lambda dataloop, kwargs: Wetax.main(dataloop, kwargs),
+            "Hometax": lambda dataloop, kwargs: Hometax.main(dataloop, kwargs),
+            "KBLand": lambda dataloop, kwargs: KBland.main(dataloop, kwargs),
+            "Realty1": lambda dataloop, kwargs: Realty1.main(dataloop, kwargs),
+            "Realty2": lambda dataloop, kwargs: Realty2.main(dataloop, kwargs),
+            "Realty3": lambda dataloop, kwargs: Realty3.main(dataloop, kwargs),
+            "Rtech": lambda dataloop, kwargs: Rtech1.main(dataloop, kwargs),
+            "Rtech2": lambda dataloop, kwargs: Rtech2.main(dataloop, kwargs),  
         }
-        dataloop.append(entry2)
 
-        print(f"{ticker} 실행 중...")
+        result = None
+        i = 1
+        KBland_ResCode = ''
+        Rtech_ResCode = ''
+        Etc_ResCode = ''
 
-        # 우선순위 정상처리되면 종료한다.
-        if KBland_ResCode == '00000000' or Rtech_ResCode == '00000000':
-            break
-        if Etc_ResCode == '00000000':     
-            break
-        
-        try:
-            if ticker in module_mapping:
-                # if ticker == "Rtech":
-                result = module_mapping[ticker](
-                            dataloop,
-                            collected_data
-                        )                    
+        # 데이터를 Ticker 순서대로 처리
+        for entry in data:
+            ticker = entry["Ticker"]
+            addResch = entry["addResch"]
+            rank = entry["Rank"]
+            Search_Gubun = entry["Search_Gubun"]
+            Estate_Gubun = entry["Estate_Gubun"]
+            num = len(data) 
+
+            dataloop = []
+            entry2 = {
+                "Ticker": ticker,
+                "Rank": rank,
+                "addResch": addResch,
+                "Search_Gubun": Search_Gubun,
+                "Estate_Gubun": Estate_Gubun
+            }
+            dataloop.append(entry2)
+
+            print(f"{ticker} 실행 중...")
+
+            # 우선순위 정상처리되면 종료한다.
+            if KBland_ResCode == '00000000' or Rtech_ResCode == '00000000':
+                break
+            if Etc_ResCode == '00000000':     
+                break
+            
+            try:
+                if ticker in module_mapping:
+                    # if ticker == "Rtech":
+                    result = module_mapping[ticker](
+                                dataloop,
+                                collected_data
+                            )                    
 
 
-                # if ticker == 'Rtech':
-                #     KBland_ResCode = respsult['response_code']
-                # elif ticker == 'Rtech':
-                #     Rtech_ResCode = result['response_code']
-                # else: 
-                #     Etc_ResCode = result['response_code']
+                    # if ticker == 'Rtech':
+                    #     KBland_ResCode = respsult['response_code']
+                    # elif ticker == 'Rtech':
+                    #     Rtech_ResCode = result['response_code']
+                    # else: 
+                    #     Etc_ResCode = result['response_code']
 
-                # print(f"{ticker} : response value!!!")    
-                # print("KBland_ResCode:", KBland_ResCode)
-                # print("Rtech_ResCode:", Rtech_ResCode)
-                # print("Etc_ResCode:", Etc_ResCode)
+                    # print(f"{ticker} : response value!!!")    
+                    # print("KBland_ResCode:", KBland_ResCode)
+                    # print("Rtech_ResCode:", Rtech_ResCode)
+                    # print("Etc_ResCode:", Etc_ResCode)
 
-                # 화면값 세팅값    
-                data_insert(result, i)
-                # 첨부 파일 처리
-                file_attach(dataloop, collected_data, i)
+                    # 화면값 세팅값    
+                    data_insert(result, i, num)
+                    # 첨부 파일 처리
+                    file_attach(dataloop, collected_data, i)
 
-                print(f"{ticker} 실행 완료.")
-                
-            else:
-                print(f"{ticker} 실행 중 오류 발생")
+                    print(f"{ticker} 실행 완료.")
+                    
+                else:
+                    print(f"{ticker} 실행 중 오류 발생")
+                    # result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
+                    # result['response_code'] = '90000000'
+            except Exception as e:
+                print(f"{ticker} 실행 중 오류 발생fdfd: {e}")
                 # result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
                 # result['response_code'] = '90000000'
+
+            i += 1
+
+        # 등록 버튼 클릭
+        try:
+            submit_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "btnInsert"))
+            )
+            submit_button.click()
+            print("RPA 등록 완료!")
+            time.sleep(3)
         except Exception as e:
-            print(f"{ticker} 실행 중 오류 발생fdfd: {e}")
-            # result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
-            # result['response_code'] = '90000000'
+            print("RPA 등록 버튼 클릭 실패:", e)
 
-        i += 1
+        # 드라이버 종료 후 다시 실행
+        driver.quit()
+        time.sleep(5)
 
-if __name__ == "__main__":
-    main(data)
-    
+    except Exception as e:
+        print("오류 발생:", e)
+        driver.quit()
+        time.sleep(3)
