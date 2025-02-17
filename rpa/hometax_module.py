@@ -86,7 +86,7 @@ def hometax_streetnum(driver, kwargs):
                 EC.element_to_be_clickable((By.XPATH, "//span[@id='mf_txppWframe_menu_gen_0_tbx_content' and contains(@class, 'w2textbox')]"))
             )
             office_building.click() 
-            time.sleep(5)
+            time.sleep(3)
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "오피스텔 및 상업용 건물 클릭 타임아웃 발생."
@@ -99,7 +99,7 @@ def hometax_streetnum(driver, kwargs):
                 EC.visibility_of_element_located((By.ID, "mf_txppWframe_btnLdCdPop"))
             )
             txppWframe_button.click()
-            time.sleep(5)
+            time.sleep(3)
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "법정동검색 클릭 타임아웃 발생."
@@ -166,7 +166,7 @@ def hometax_streetnum(driver, kwargs):
                 EC.visibility_of_element_located((By.ID, "mf_txppWframe_btnSchBld"))
             )
             driver.execute_script("arguments[0].click();", select_button2)
-            time.sleep(5)
+            time.sleep(3)
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "번지/호 입력 타임아웃 발생."
@@ -198,16 +198,16 @@ def hometax_streetnum(driver, kwargs):
                 for item in matching_items:
                     item_text = item.text.strip()
                     if Building_No1 in item_text:
-                        print(f"목표 항목 '{Building_Name + Building_No1}'를 찾았습니다. 클릭합니다.")
+                        print(f"목표 항목 {Building_Name + Building_No1}를 찾았습니다. 클릭합니다.")
                         driver.execute_script("arguments[0].scrollIntoView();", item)
                         item.click()
                         break
                     response["response_code"] = "00000000"
-                    response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
+                    response["response_msg"] = f"목표 항목 {Building_Name}를 찾지 못했습니다."
                     response["data"] = [0, 0, 0, 0]
                 else:
                     # building_no1을 포함하지 않지만, Building_Name을 포함하는 항목이 있으면 클릭
-                    print(f"목표 항목 '{Building_Name}'를 찾았습니다. building_no1을 포함하지 않지만 클릭합니다.")
+                    print(f"목표 항목 {Building_Name}를 찾았습니다. building_no1을 포함하지 않지만 클릭합니다.")
                     item = matching_items[0]  # 첫 번째 항목을 클릭
                     driver.execute_script("arguments[0].scrollIntoView();", item)
                     item.click()
@@ -215,7 +215,7 @@ def hometax_streetnum(driver, kwargs):
             else:
                 # Building_Name을 포함한 항목을 찾지 못한 경우
                 response["response_code"] = "00000000"
-                response["response_msg"] = f"목표 항목 '{Building_Name + Building_No1}'를 찾지 못했습니다."
+                response["response_msg"] = f"목표 항목 {Building_Name + Building_No1}를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
 
@@ -250,7 +250,7 @@ def hometax_streetnum(driver, kwargs):
             except Exception as e:
                 e = str(e).split("\n")[0]
                 response["response_code"] = "90000001"
-                response["response_msg"] = f"'{Building_No1}' 값으로 선택하는 데 실패했습니다: {e}"
+                response["response_msg"] = f"{Building_No1} 값으로 선택하는 데 실패했습니다: {e}"
                 response["data"] = [0, 0, 0, 0]
                 return response
 
@@ -391,7 +391,7 @@ def hometax_roadnum(driver, kwargs):
             response["response_msg"] = "페이지 로드 타임아웃 발생."
             response["data"] = [0, 0, 0, 0]
             return response
-        time.sleep(5)
+        time.sleep(3)
 
         try:
             # 검색창에 기준시가 입력
@@ -414,7 +414,7 @@ def hometax_roadnum(driver, kwargs):
                 EC.element_to_be_clickable((By.XPATH, "//span[@id='mf_txppWframe_menu_gen_0_tbx_content' and contains(@class, 'w2textbox')]"))
             )
             office_building.click() 
-            time.sleep(5)
+            time.sleep(3)
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "오피스텔 및 상업용 건물 클릭 타임아웃 발생."
@@ -448,7 +448,7 @@ def hometax_roadnum(driver, kwargs):
                 EC.visibility_of_element_located((By.ID, "mf_txppWframe_btnSchRoadNm"))
             )
             driver.execute_script("arguments[0].click();", mf_txppWframe_btnSchRoadNm)
-            time.sleep(5)
+            time.sleep(3)
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "도로명주소로 검색 타임아웃 발생."
@@ -486,7 +486,7 @@ def hometax_roadnum(driver, kwargs):
 
                     if Ridong in item and Doro_Name in item:
                         FindFlag = True
-                        print(f"목표 항목 '{Ridong}'를 찾았습니다. 클릭합니다.")
+                        print(f"목표 항목 {Ridong}를 찾았습니다. 클릭합니다.")
                         # 해당 항목을 찾음
                         target_element = WebDriverWait(driver, 10).until(
                             EC.element_to_be_clickable((By.XPATH, f"//a[contains(text(), '{item}')]"))
@@ -504,7 +504,7 @@ def hometax_roadnum(driver, kwargs):
 
             if not FindFlag:                
                 response["response_code"] = "00000000"
-                response["response_msg"] = f"목표 항목 '{Ridong, Doro_Name}'를 찾지 못했습니다."
+                response["response_msg"] = f"목표 항목 {Ridong, Doro_Name}를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response 
     
@@ -542,16 +542,16 @@ def hometax_roadnum(driver, kwargs):
                 for item in matching_items:
                     item_text = item.text.strip()
                     if Building_No1 in item_text:
-                        print(f"목표 항목 '{Building_Name + Building_No1}'를 찾았습니다. 클릭합니다.")
+                        print(f"목표 항목 {Building_Name + Building_No1}를 찾았습니다. 클릭합니다.")
                         driver.execute_script("arguments[0].scrollIntoView();", item)
                         item.click()
                         break
                     response["response_code"] = "00000000"
-                    response["response_msg"] = f"목표 항목 '{Building_Name}'를 찾지 못했습니다."
+                    response["response_msg"] = f"목표 항목 {Building_Name}를 찾지 못했습니다."
                     response["data"] = [0, 0, 0, 0]
                 else:
                     # building_no1을 포함하지 않지만, Building_Name을 포함하는 항목이 있으면 클릭
-                    print(f"목표 항목 '{Building_Name}'를 찾았습니다. building_no1을 포함하지 않지만 클릭합니다.")
+                    print(f"목표 항목 {Building_Name}를 찾았습니다. building_no1을 포함하지 않지만 클릭합니다.")
                     item = matching_items[0]  # 첫 번째 항목을 클릭
                     driver.execute_script("arguments[0].scrollIntoView();", item)
                     item.click()
@@ -559,7 +559,7 @@ def hometax_roadnum(driver, kwargs):
             else:
                 # Building_Name을 포함한 항목을 찾지 못한 경우
                 response["response_code"] = "00000000"
-                response["response_msg"] = f"목표 항목 '{Building_Name + Building_No1}'를 찾지 못했습니다."
+                response["response_msg"] = f"목표 항목 {Building_Name + Building_No1}를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
 
@@ -595,7 +595,7 @@ def hometax_roadnum(driver, kwargs):
             except Exception as e:
                 e = str(e).split("\n")[0]
                 response["response_code"] = "90000001"
-                response["response_msg"] = f"'{Building_No1}' 값으로 선택하는 데 실패했습니다: {e}"
+                response["response_msg"] = f"{Building_No1} 값으로 선택하는 데 실패했습니다: {e}"
                 response["data"] = [0, 0, 0, 0]
                 return response
     

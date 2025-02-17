@@ -37,14 +37,23 @@ def screenshot_save(driver, dataloop, kwargs):
         print("screenshot_name : ", screenshot_name) 
         screenshot_path = os.path.join(folder_path, screenshot_name)
 
+        # 창 크기 조정 추가
+        # try:
+        #     driver.maximize_window()  # 창을 최대화
+        #     time.sleep(1) 
+        #     driver.set_window_rect(0, 0, 1280, 1024)  # 창 크기 강제 조정
+        # except Exception as e:
+        #     print(f"창 크기 변경 중 오류 발생: {e}")
+
         # 전체 페이지 스크린샷 저장
         try:
+            time.sleep(2)
             full_screenshot.capture_full_page(driver, screenshot_path)
             print(f"전체 페이지 스크린샷 저장 완료: {screenshot_path}")
         except Exception as e:
             print(f"스크린샷 저장 중 오류 발생: {e}")
 
-        time.sleep(7)
+        time.sleep(1)
 
     except Exception as e:
         e = str(e).split("\n")[0]

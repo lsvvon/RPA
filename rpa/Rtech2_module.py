@@ -176,7 +176,7 @@ def rtech_app_streetnum(driver, kwargs):
                 matching_item.click()
             else:
                 response["response_code"] = "90000001"
-                response["response_msg"] = f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다."
+                response["response_msg"] = f"주소 {search_address}에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
         except Exception as e:
@@ -359,7 +359,7 @@ def rtech_app_roadnum(driver, kwargs):
                 matching_item.click()
             else:
                 response["response_code"] = "90000000"
-                response["response_msg"] = f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다."
+                response["response_msg"] = f"주소 {search_address}에 대한 일치 결과를 찾을 수 없습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
         except Exception as e:

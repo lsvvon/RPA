@@ -22,10 +22,10 @@ def rtech_streetnum(driver, dataloop, kwargs):
     for entry in dataloop:
         Estate_Gubun = entry.get("Estate_Gubun") 
 
-    if Estate_Gubun == '1':
+    if Estate_Gubun == '1' or Estate_Gubun == '2':
         Estate_Name = '아파트'
         Estate_ch = '아'
-    elif Estate_Gubun == '4' or Estate_Gubun == '2':
+    elif Estate_Gubun == '4':
         Estate_Name = '오피스텔'
         Estate_ch = '오'
 
@@ -146,7 +146,7 @@ def rtech_streetnum(driver, dataloop, kwargs):
                 matching_item.click()
             else:
                 response["response_code"] = "90000001"
-                response["response_msg"] = f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다."
+                response["response_msg"] = f"주소 {search_address}에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
             
@@ -302,7 +302,7 @@ def rtech_roadnum(driver, dataloop, kwargs):
                 matching_item.click()
             else:
                 response["response_code"] = "90000001"
-                response["response_msg"] = f"주소 '{search_address}'에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다."
+                response["response_msg"] = f"주소 {search_address}에 대한 일치 결과를 찾을 수 없습니다. 프로그램을 종료합니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
         except Exception as e:
@@ -496,7 +496,7 @@ def captcha_HUG(driver, dataloop, kwargs):
                     captcha_input = WebDriverWait(driver, 20).until(
                         EC.element_to_be_clickable((By.ID, "capcha"))
                     )
-                    time.sleep(5)
+                    time.sleep(3)
 
                     captcha_input.send_keys(predict_sh.get_predictions())
                 except Exception as e:
@@ -659,7 +659,7 @@ def captcha_HUG(driver, dataloop, kwargs):
                     captcha_input = WebDriverWait(driver, 20).until(
                         EC.element_to_be_clickable((By.ID, "office_capcha"))
                     )
-                    time.sleep(5)
+                    time.sleep(2)
 
                     captcha_input.send_keys(predict_sh.get_predictions())
                 except Exception as e:

@@ -15,7 +15,8 @@ import Rtech2
 import Wetax
 import os
 from dotenv import load_dotenv
-
+from datetime import datetime, timedelta
+import time
 # .env 파일 활성화
 load_dotenv()
 AppKey = os.getenv('AppKey')
@@ -29,7 +30,7 @@ chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 
 
-def data_insert(result, i, num):
+def data_insert(result, i):
     print(result)
     if i == 1:
         i = ''
@@ -65,29 +66,6 @@ def data_insert(result, i, num):
         )
         Base_Date.send_keys(result['data'][3] if result['data'][3] is not None else '')
 
-        if i == num:
-            time.sleep(1)
-            Response_Code1 = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.ID, "Response_Code1"))
-            )
-            Response_Msg1 = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.ID, "Response_Msg1"))
-            )
-            time.sleep(1)
-            response_code_input = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, "Response_Code" + str(num)))
-            )
-            response_value = response_code_input.get_attribute('value')
-
-            # rpa 성공 여부 판단
-            if response_value:
-                Response_Code1.send_keys("00000000")
-                Response_Msg1.send_keys("RPA 정상적으로 처리되었습니다.")
-                print("✅ RPA 실행 성공!")
-            else:
-                Response_Code1.send_keys("90000000")
-                Response_Msg1.send_keys("RPA 처리 중 오류가 발생하였습니다.")
-                print("❌ RPA 실행 실패!")
     else:
         print("main data insert 결과를 사용할 수 없습니다.")
 
@@ -115,7 +93,32 @@ def file_attach(dataloop, collected_data, i):
     )
     txtFile_capImg.send_keys(file_path)
 
+def response_insert():
+    Response_Code1 = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "Response_Code1"))
+    )
+    Response_Msg1 = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "Response_Msg1"))
+    )
+    time.sleep(1)
+    # rpa 성공 여부 판단
+    # if response_value:
+    Response_Code1.send_keys("00000000")
+    Response_Msg1.send_keys("RPA 정상적으로 처리되었습니다.")
+    print("✅ RPA 실행 성공!")
+    # # else:
+    #     Response_Code1.send_keys("90000000")
+    #     Response_Msg1.send_keys("RPA 처리 중 오류가 발생하였습니다.")
+    #     print("❌ RPA 실행 실패!")
+
 # 반복 실행을 위한 while루프
+# end_time = datetime.now() + timedelta(hours=4)
+# now = time.localtime()  # 현재 시간 가져오기
+# formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", now)
+# print(formatted_time)  # 예: 2025-02-11 14:30:45
+# print(end_time)
+
+# while datetime.now() < end_time:
 while True:
     try:
         driver = common_module.initialize_driver()
@@ -250,12 +253,12 @@ while True:
             # 우선순위 정상처리되면 종료한다.
             if KBland_ResCode == '00000000' or Rtech_ResCode == '00000000':
                 break
-            if Etc_ResCode == '00000000':     
+            if Etc_ResCode == '00000000':   
                 break
             
             try:
                 if ticker in module_mapping:
-                    # if ticker == "Rtech":
+                    # if ticker == "KBLand":
                     result = module_mapping[ticker](
                                 dataloop,
                                 collected_data
@@ -263,28 +266,19 @@ while True:
 
 
                     # if ticker == 'Rtech':
-                    #     KBland_ResCode = respsult['response_code']
+                    #     KBland_ResCode = result['response_code']
                     # elif ticker == 'Rtech':
                     #     Rtech_ResCode = result['response_code']
                     # else: 
                     #     Etc_ResCode = result['response_code']
 
-                    # print(f"{ticker} : response value!!!")    
-                    # print("KBland_ResCode:", KBland_ResCode)
-                    # print("Rtech_ResCode:", Rtech_ResCode)
-                    # print("Etc_ResCode:", Etc_ResCode)
-
                     # 화면값 세팅값    
-                    data_insert(result, i, num)
+                    data_insert(result, i)
                     # 첨부 파일 처리
                     file_attach(dataloop, collected_data, i)
 
                     print(f"{ticker} 실행 완료.")
                     
-                else:
-                    print(f"{ticker} 실행 중 오류 발생")
-                    # result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
-                    # result['response_code'] = '90000000'
             except Exception as e:
                 print(f"{ticker} 실행 중 오류 발생fdfd: {e}")
                 # result['response_msg'] = f"{ticker} 실행 중 오류 발생: {e}"
@@ -294,6 +288,19 @@ while True:
 
         # 등록 버튼 클릭
         try:
+            # response_code, response_msg 값 넣기
+            Response_Code1 = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "Response_Code1"))
+            )
+            Response_Msg1 = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "Response_Msg1"))
+            )
+            time.sleep(3)
+            # rpa 성공 여부 판단
+            Response_Code1.send_keys("00000000")
+            Response_Msg1.send_keys("RPA 정상적으로 처리되었습니다.")
+            print("✅ RPA 실행 성공!")
+
             submit_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.ID, "btnInsert"))
             )
@@ -311,3 +318,4 @@ while True:
         print("오류 발생:", e)
         driver.quit()
         time.sleep(3)
+

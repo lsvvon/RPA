@@ -232,9 +232,9 @@ def KBland_roadnum(driver, dataloop, kwargs):
         Doro_No = kwargs.get('Doro_No1')
         Doro_No2 = kwargs.get('Doro_No2')
         if Doro_No2 == '':
-            Doro_Name = kwargs.get('Doro_Name1') + ' ' + Doro_No
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No
         else:
-            Doro_Name = kwargs.get('Doro_Name1') + ' ' + Doro_No + '-' + Doro_No2
+            Doro_Name2 = kwargs.get('Doro_Name1') + ' ' + Doro_No + '-' + Doro_No2
         Chosung = kwargs.get('Chosung1')
         Build_Area = kwargs.get('Build_Area1')
 
@@ -276,7 +276,7 @@ def KBland_roadnum(driver, dataloop, kwargs):
             input_element = WebDriverWait(driver, 20).until(
                 EC.visibility_of_element_located((By.CSS_SELECTOR, ".form-control"))
             )
-            input_element.send_keys(Doro_Name)
+            input_element.send_keys(Doro_Name2)
             time.sleep(2)
             input_element.send_keys(Keys.ENTER)
 
