@@ -197,12 +197,13 @@ def hometax_streetnum(driver, kwargs):
                 # 그 중에서 building_no1을 포함한 항목을 찾는다
                 for item in matching_items:
                     item_text = item.text.strip()
+                    
                     if Building_No1 in item_text:
                         print(f"목표 항목 {Building_Name + Building_No1}를 찾았습니다. 클릭합니다.")
                         driver.execute_script("arguments[0].scrollIntoView();", item)
                         item.click()
                         break
-                    response["response_code"] = "00000000"
+                    response["response_code"] = "90000005"
                     response["response_msg"] = f"목표 항목 {Building_Name}를 찾지 못했습니다."
                     response["data"] = [0, 0, 0, 0]
                 else:
@@ -214,7 +215,7 @@ def hometax_streetnum(driver, kwargs):
 
             else:
                 # Building_Name을 포함한 항목을 찾지 못한 경우
-                response["response_code"] = "00000000"
+                response["response_code"] = "90000005"
                 response["response_msg"] = f"목표 항목 {Building_Name + Building_No1}를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response
@@ -232,13 +233,18 @@ def hometax_streetnum(driver, kwargs):
         EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldComp'))
         )
         select = Select(select_dong)
-        if not Building_No1 or Building_No1.strip() == "": # Building_No1이 빈값인지 확인
-            # 첫 번째 옵션 선택
+        # 옵션 목록 가져오기
+        options = select.options
+        time.sleep(1)
+        # 동 옵션이 2개뿐이라면 자동 선택(선택하세요, 1(단일))
+        if len(options) == 2:
+            select.select_by_index(1) 
+        # Building_No1이 빈 값이면 첫 번째 옵션 선택
+        elif not Building_No1 or Building_No1.strip() == "":
             select.select_by_index(1)
         else:
             # Building_No1 값으로 선택
             try:
-                options = select.options
                 for option in options:
                     if Building_No1 in option.text:
                         select.select_by_visible_text(option.text)
@@ -503,7 +509,7 @@ def hometax_roadnum(driver, kwargs):
                     time.sleep(2) 
 
             if not FindFlag:                
-                response["response_code"] = "00000000"
+                response["response_code"] = "90000005"
                 response["response_msg"] = f"목표 항목 {Ridong, Doro_Name}를 찾지 못했습니다."
                 response["data"] = [0, 0, 0, 0]
                 return response 
@@ -546,7 +552,7 @@ def hometax_roadnum(driver, kwargs):
                         driver.execute_script("arguments[0].scrollIntoView();", item)
                         item.click()
                         break
-                    response["response_code"] = "00000000"
+                    response["response_code"] = "90000005"
                     response["response_msg"] = f"목표 항목 {Building_Name}를 찾지 못했습니다."
                     response["data"] = [0, 0, 0, 0]
                 else:
@@ -576,8 +582,14 @@ def hometax_roadnum(driver, kwargs):
         EC.element_to_be_clickable((By.ID, 'mf_txppWframe_selBldComp'))
         )
         select = Select(select_dong)
-        if not Building_No1 or Building_No1.strip() == "":  # Building_No1이 빈값인지 확인
-            # 첫 번째 옵션 선택
+        # 옵션 목록 가져오기
+        options = select.options
+        time.sleep(1)
+        # 동 옵션이 2개뿐이라면 자동 선택(선택하세요, 1(단일))
+        if len(options) == 2:
+            select.select_by_index(1) 
+        # Building_No1이 빈 값이면 첫 번째 옵션 선택
+        elif not Building_No1 or Building_No1.strip() == "":
             select.select_by_index(1)
         else:
             # Building_No1 값으로 선택

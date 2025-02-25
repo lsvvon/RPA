@@ -228,7 +228,7 @@ def etax_officetel(driver, kwargs):
             return response
         except TimeoutException as e:
             response["response_code"] = "90000000"
-            response["response_msg"] = "건물시가표준액 타임아웃 발생."
+            response["response_msg"] = "검색 결과가 존재하지 않습니다.[건물시가표준액]"
             response["data"] = [0, 0, 0, 0]
             return response 
     

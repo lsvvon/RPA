@@ -137,7 +137,7 @@ def realtyprice_apt_streetnum(driver, kwargs):
                     break
         except TimeoutException:
             response["response_code"] = "90000000"
-            response["response_msg"] = "단지명 선택 중 타임아웃 발생"
+            response["response_msg"] = "검색한 물건에 단지가 존재하지 않음"
             response["data"] = [0, 0, 0, 0]
             return response
         time.sleep(2)
@@ -145,16 +145,29 @@ def realtyprice_apt_streetnum(driver, kwargs):
         try:
             dong = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, 'dong')))
             select_4 = Select(dong)
+            options = select_4.options
             if not Building_No1 or Building_No1.strip() == "":
                 select_4.select_by_index(0)
             else:
-                select_4.select_by_visible_text(Building_No1)
-
+                for option in options:
+                    if Building_No1 in option.text:
+                        select_4.select_by_visible_text(option.text)
+                        break
             time.sleep(2)
 
+            # 호를 '포함'하는 select 찾기
             ho = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, 'ho')))
             select_5 = Select(ho)
-            select_5.select_by_visible_text(Room_No)
+            options = select_5.options
+            for option in options:
+                if Room_No in option.text:
+                    select_5.select_by_visible_text(option.text)
+                    break
+        except Exception as e:
+            e = str(e).split("\n")[0]
+            response["response_code"] = "90000001"
+            response["response_msg"] = f"동/호 선택 중 예외 발생: {e}"
+            response["data"] = [0, 0, 0, 0]
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "동/호 선택 중 타임아웃 발생"
@@ -370,22 +383,27 @@ def realtyprice_apt_roadnum(driver, kwargs):
 
         try:
             # 동 클릭
-            dong = WebDriverWait(driver, 20).until(
-                EC.element_to_be_clickable((By.ID, 'dong'))
-            )
+            dong = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.ID, 'dong')))
             select_4 = Select(dong)
-            # Building_No1이 빈값인지 확인
+            options = select_4.options
             if not Building_No1 or Building_No1.strip() == "":
-                select_4.select_by_index(0)  # 첫 번째 값 선택
+                select_4.select_by_index(0)
             else:
-                select_4.select_by_visible_text(Building_No1)  # Building_No1 값 선택
+                for option in options:
+                    if Building_No1 in option.text:
+                        select_4.select_by_visible_text(option.text)
+                        break
             time.sleep(2)
             # 호 클릭
             ho = WebDriverWait(driver, 20).until(
                 EC.element_to_be_clickable((By.ID, 'ho'))
             )
             select_5 = Select(ho)
-            select_5.select_by_visible_text(Room_No)
+            options = select_5.options
+            for option in options:
+                if Room_No in option.text:
+                    select_5.select_by_visible_text(option.text)
+                    break
         except Exception as e:
             e = str(e).split("\n")[0]
             response["response_code"] = "90000001"
@@ -999,7 +1017,7 @@ def realtyprice_land_streetnum(driver, kwargs):
             response["data"] = [realty_land_value, 0, 0, 0]           
         except TimeoutException:
             response["response_code"] = "90000000"
-            response["response_msg"] = "개별주택가격 값을 가져오는 중 타임아웃 발생"
+            response["response_msg"] = "검색 결과가 존재하지 않습니다.[개별공시지가]"
             response["data"] = [0, 0, 0, 0]
             return response
         except Exception as e:

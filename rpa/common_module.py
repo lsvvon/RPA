@@ -61,3 +61,5 @@ def screenshot_save(driver, dataloop, kwargs):
         response["response_msg"] = f"스크린샷을 실패했습니다: {e}"
         response["data"] = [0, 0, 0, 0]
         return response
+    
+

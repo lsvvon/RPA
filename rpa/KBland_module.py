@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 import time
 import re
 import difflib
@@ -25,6 +26,7 @@ def KBland_streetnum(driver, dataloop, kwargs):
         Jibun_No2 = kwargs.get('Jibun_No2')
         Building_Name = kwargs.get('Building_Name1')
         Build_Area = kwargs.get('Build_Area1')
+        Estate_Gubun1 = kwargs.get('Estate_Gubun1')
 
         url = "https://kbland.kr/home"
         driver.get(url)
@@ -68,12 +70,11 @@ def KBland_streetnum(driver, dataloop, kwargs):
             address = f"{address_parts[0]} {address_parts[1]}-{address_parts[2]}".strip()
             if address.endswith("-"):
                 address = address[:-1]
-
+            
             input_element.send_keys(address)
             input_element.send_keys(Keys.ENTER)
             time.sleep(5)
         
-
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "주소 입력 중 타임아웃 발생."
@@ -93,68 +94,173 @@ def KBland_streetnum(driver, dataloop, kwargs):
                 million = int(match.group(2).replace(",", "")) * 10**4 if match.group(2) else 0
                 return billion + million
             return 0
-            
+
+        # 상세시세에서 면적 클릭히고 해당하는 대상 선택한다. 시세를 가져온다.   
         def proceed_with_area_selection(driver, Build_Area, response):
             try:
                 time.sleep(3)
+                # 면적 클릭해서 리스트 가져오기
                 area_select_div = WebDriverWait(driver, 20).until(
                     EC.visibility_of_element_located((By.CSS_SELECTOR, ".widthTypeValue"))
                 )
                 driver.execute_script("arguments[0].click();", area_select_div)
                 time.sleep(3)
 
-                area_elements = WebDriverWait(driver, 20).until(
-                    EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tdbold"))
+                # 타이틀 시세, KB AI시세 구분하기
+                detailTit_element = WebDriverWait(driver, 20).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, ".detailTit"))
                 )
-                area_list = [element.text for element in area_elements]
-                cnt = 0
-
-                for i in range(len(area_list)):
-                    cnt += 1
-                    if Build_Area in area_list[i]:
-                        area_select = driver.find_elements(By.CLASS_NAME, "tdbold")[i]
-                        driver.execute_script("arguments[0].click();", area_select)
-                        break
-
-                if cnt == len(area_list):
-                    response["response_code"] = "90000000"
-                    response["response_msg"] = "면적을 찾을 수 없음."
-                    response["data"] = [0, 0, 0, 0]
-                    return response
+                detailTit_element = detailTit_element.text.strip()
                 
-                time.sleep(3)
-                common_value_element = WebDriverWait(driver, 20).until(
-                    EC.visibility_of_element_located((By.CSS_SELECTOR, ".costvalue"))
-                )
-                common_value_text = common_value_element.text.strip()       
+                # 타이틀에 AI 있는지 체크해서 분기한다. 문자열 어디에든 정규식과 일치하는 부분이 있는지 확인합니다
+                search = re.search("AI", detailTit_element) 
+                if search:
+                    # KB AI시세            
+                    # 면적 리스트 
+                    area_elements = WebDriverWait(driver, 20).until(
+                        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tdbox.txcenter"))
+                    )
+                    area_list = [element.text for element in area_elements]
 
-                if "시세없음" in common_value_text:  # 시세없음인 경우 0 반환
-                    kb_common_value = '시세없음'
-                    kb_low_value = 0
-                    date_text = 0
-                    print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
+                    # 해당 면적 선택 여부
+                    build_flag = False
+
+                    for i in range(len(area_list)):                    
+                        if Build_Area in area_list[i]:
+                            area_select = driver.find_elements(By.CLASS_NAME, "tdbox.txcenter")[i]
+                            driver.execute_script("arguments[0].click();", area_select)
+                            build_flag = True
+                            break
+
+                    # 면적없음            
+                    if build_flag == False:
+                        response["response_code"] = "90000000"
+                        response["response_msg"] = "면적을 찾을 수 없음."
+                        response["data"] = [0, 0, 0, 0]
+                        return response
+                    
+                    time.sleep(3) 
+
+                    # 시세가 없습니다. 여부
+                    noDataTxt_flag = True
+                    # <div data-v-607e079f="" class="noDataTxt">시세가 없습니다.</div>
+                    # 면적을 클릭하고 상세시세에 시세가 없습니다. 인 경우 체크 로직 추가                
+                    try:
+                        # 객체 찾기 :: 시세가 없습니다.
+                        noDataTxt_element = driver.find_element(By.CSS_SELECTOR, ".noDataTxt")
+                        #noDataTxt_text = noDataTxt_element.text.strip()
+                        #print("요소가 존재합니다.")
+                        noDataTxt_flag = False
+                    
+                        response["response_code"] = "90000004"
+                        response["response_msg"] = "시세가 없습니다."
+                        response["data"] = [0, 0, 0, 0]
+                        return response           
+
+                    except NoSuchElementException:
+                        print("요소를 찾을 수 없습니다.")  
+                                        
+                    # 시세가 없습니다. 아닌 경우 시세가 있는 경우 처리
+                    if noDataTxt_flag:
+                        common_value_element = WebDriverWait(driver, 20).until(
+                            EC.visibility_of_element_located((By.CSS_SELECTOR, ".costvalue"))
+                        )
+                        common_value_text = common_value_element.text.strip()     
+
+                        if "시세없음" in common_value_text:  # 시세없음인 경우 0 반환
+                            kb_common_value = '시세없음'
+                            kb_low_value = 0
+                            date_text = 0
+                            print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
+                        else:
+                            kb_common_value = parse_cost_value(common_value_text)                        
+                            # 하위평균가 가져오기
+                            low_value_element = WebDriverWait(driver, 20).until(
+                                EC.visibility_of_element_located((By.XPATH, "//span[em[text()='하위평균가']]"))
+                            )
+                            low_value_text = low_value_element.text.replace("하위평균가", "").strip()
+                            kb_low_value = parse_cost_value(low_value_text)
+                            # 기준일 가져오기
+                            date_element = WebDriverWait(driver, 20).until(
+                                EC.visibility_of_element_located((By.XPATH, "//span[@class='text-1e1e1e']"))
+                            )
+                            date_text = date_element.text.replace("’", "").strip()
+
+                    # response["response_code"] = "00000000"
+                    # response["response_msg"] = "정상적으로 처리되었습니다."
+                    # response["data"] = [kb_common_value, kb_low_value, 0, date_text]            
+                    # return response
+                
+                    response["response_code"] = "90000003"
+                    response["response_msg"] = "KB AI시세."
+                    response["data"] = [kb_common_value, kb_low_value, 0, date_text] 
+                    return response
+
                 else:
-                    kb_common_value = parse_cost_value(common_value_text)
-                    # 하위평균가 가져오기
-                    low_value_element = WebDriverWait(driver, 20).until(
-                        EC.visibility_of_element_located((By.XPATH, "//span[em[text()='하위평균가']]"))
+                    # 시세
+                    # 면적 리스트 
+                    area_elements = WebDriverWait(driver, 20).until(
+                        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".tdbold"))
                     )
-                    low_value_text = low_value_element.text.replace("하위평균가", "").strip()
-                    kb_low_value = parse_cost_value(low_value_text)
-                    # 기준일 가져오기
-                    date_element = WebDriverWait(driver, 20).until(
-                        EC.visibility_of_element_located((By.XPATH, "//span[@class='costdate']"))
-                    )
-                    date_text = date_element.text.replace("’", "").strip()
+                    area_list = [element.text for element in area_elements]
+                
+                    # 해당 면적 선택 여부
+                    build_flag = False
 
-                response["response_code"] = "00000000"
-                response["response_msg"] = "정상적으로 처리되었습니다."
-                response["data"] = [kb_common_value, kb_low_value, 0, date_text]            
-                return response
+                    for i in range(len(area_list)):                    
+                        if Build_Area in area_list[i]:
+                            area_select = driver.find_elements(By.CLASS_NAME, "tdbold")[i]
+                            driver.execute_script("arguments[0].click();", area_select)
+                            build_flag = True
+                            break
+
+                    # 면적없음            
+                    if build_flag == False:
+                        response["response_code"] = "90000000"
+                        response["response_msg"] = "면적을 찾을 수 없음."
+                        response["data"] = [0, 0, 0, 0]
+                        return response
+                    
+                    time.sleep(3)
+
+                    common_value_element = WebDriverWait(driver, 20).until(
+                        EC.visibility_of_element_located((By.CSS_SELECTOR, ".costvalue"))
+                    )
+                    common_value_text = common_value_element.text.strip()       
+
+                    if "시세없음" in common_value_text:  # 시세없음인 경우 0 반환
+                        kb_common_value = '시세없음'
+                        kb_low_value = 0
+                        date_text = 0
+                        print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
+                    else:
+                        kb_common_value = parse_cost_value(common_value_text)
+                        # 하위평균가 가져오기
+                        low_value_element = WebDriverWait(driver, 20).until(
+                            EC.visibility_of_element_located((By.XPATH, "//span[em[text()='하위평균가']]"))
+                        )
+                        low_value_text = low_value_element.text.replace("하위평균가", "").strip()
+                        kb_low_value = parse_cost_value(low_value_text)
+                        # 기준일 가져오기
+                        date_element = WebDriverWait(driver, 20).until(
+                            EC.visibility_of_element_located((By.XPATH, "//span[@class='costdate']"))
+                        )
+                        date_text = date_element.text.replace("’", "").strip()
+
+                    response["response_code"] = "00000000"
+                    response["response_msg"] = "정상적으로 처리되었습니다."
+                    response["data"] = [kb_common_value, kb_low_value, 0, date_text]            
+                    return response
 
             except TimeoutException:
                 response["response_code"] = "90000000"
-                response["response_msg"] = "예상치 못한 오류 발생."
+                response["response_msg"] = "시세조회 타임아웃 발생."
+                response["data"] = [0, 0, 0, 0]
+                return response
+            except Exception as e:
+                e = str(e).split("\n")[0]
+                response["response_code"] = "90000001"
+                response["response_msg"] = f"예상치 못한 오류 발생: {e}"
                 response["data"] = [0, 0, 0, 0]
                 return response
             
@@ -170,25 +276,76 @@ def KBland_streetnum(driver, dataloop, kwargs):
 
             if driver.find_elements(By.CSS_SELECTOR, ".nodata"):
                 nodata_message = driver.find_element(By.CSS_SELECTOR, ".nodata").text.strip()
-                response["response_code"] = "00000000"
+                response["response_code"] = "90000005"
                 response["response_msg"] = f"검색 결과가 없습니다: {nodata_message}"
                 response["data"] = [0, 0, 0, 0]
                 return response
 
-            items = driver.find_elements(By.CSS_SELECTOR, ".item-search-poi")
-
+            # ==============================================================================================
+            # 주소검색해서 1건 나오는 경우 상세화면으로 바로 넘어가는데 면적 객체가(widthTypeValue) 있으면 상세화면으로 인식하고 면적 클릭으로 넘어간다. 콜 함수에서 면적에 해당건 가져온다.            
+            # ==============================================================================================
             if driver.find_elements(By.CSS_SELECTOR, ".widthTypeValue"):
                 return proceed_with_area_selection(driver, Build_Area, response)
+            
+            # ==============================================================================================
+            # 주소검색해서 2건이상 나오는 경우 리스트에서 선텍한다.
+            # ==============================================================================================
+            items = driver.find_elements(By.CSS_SELECTOR, ".item-search-poi")
 
+            # 물건지 : 1 주상복합 아파트, 4 오피스텔 2 다세대 및 연립주택, 3 기타(단독주택, 다가구주택) 객체명 처리
+            if Estate_Gubun1 == "1":
+                Estate_class = "ico-poi.ico-apt"
+                Estate_Name = "주상복합"
+                Estate_Name2 = "아파트"
+            if Estate_Gubun1 == "4":
+                Estate_class = "ico-poi.ico-officetel"
+                Estate_Name = "오피스텔"
+            if Estate_Gubun1 == "2":
+                Estate_class = "ico-poi.ico-officetel"
+                Estate_Name = "연립주택"
+                Estate_Name2 = "다세대"
+            if Estate_Gubun1 == "3":
+                Estate_class = "ico-poi.ico-officetel"
+                Estate_Name = "단독주택"
+                Estate_Name2 = "다가구주택"       
+
+            #<span data-v-2e001bba="" class="ico-poi ico-apt">주상복합</span>
+            #<span data-v-2e001bba="" class="ico-poi ico-officetel">오피스텔</span>
+            # Estate_class.replace(" ", ".")
+
+            Building_Name3 = ""
+            # 건물명 동 선처리(건물명에 동이 있는 경우) 마지막에 동만 제거한다. 
+            Ridong3 = re.sub("동$", "", Ridong)
+            # 마지막 동 제거하고 건물명에 있으면 치환한다.
+            match = re.match(Ridong3, Building_Name) 
+            if match:
+                Building_Name3 = Building_Name.replace(Ridong3, Ridong)
+              
             if items:
                 for item in items:
+                    try:
+                        # 객체 찾기 :: 물건지 처리
+                        Estate_element = item.find_element(By.CSS_SELECTOR, "." + Estate_class)
+                        Estate_text = Estate_element.text.strip()
+                        #print("요소가 존재합니다.")
+                    except NoSuchElementException:
+                        #print("요소를 찾을 수 없습니다.")
+                        continue  # 요소가 없는 경우 건너뛰고, 다음 반복으로 넘어감
+                    
+                    # 건물명
                     name_element = item.find_element(By.CSS_SELECTOR, ".text")
-                    name_text = name_element.text.strip()
+                    name_text = name_element.text.strip()                    
 
-                    if Building_Name in name_text:
-                        name_element.click()
+                    # 1.건물명(건물명에 동이 있는경우 동 제외인 경우), 물건지 필터링
+                    if Building_Name in name_text and (Estate_Name in Estate_text or Estate_Name2 in Estate_text):
+                        name_element.click()                      
                         return proceed_with_area_selection(driver, Build_Area, response)
-               
+                    
+                    # 2.건물명(건물명에 동이 있는경우 동 포함해야 하는 경우), 물건지 필터링
+                    if Building_Name3 != "" and Building_Name3 in name_text and (Estate_Name in Estate_text or Estate_Name2 in Estate_text):
+                        name_element.click()                      
+                        return proceed_with_area_selection(driver, Build_Area, response)
+
                 return proceed_with_area_selection(driver, Build_Area, response)
         except TimeoutException:
             response["response_code"] = "90000000"
@@ -211,7 +368,10 @@ def KBland_streetnum(driver, dataloop, kwargs):
 
     return response
 
+
+# ==========================================================================================
 # 도로명 주소 검색
+# ==========================================================================================
 def KBland_roadnum(driver, dataloop, kwargs):
     response = {
         "response_code": None,

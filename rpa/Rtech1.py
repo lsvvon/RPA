@@ -11,24 +11,22 @@ def main(dataloop, collected_data):
             Search_Gubun = entry.get("Search_Gubun")
             addResch = entry.get("addResch") 
 
-
         if Search_Gubun == '1': # 지번검색일때
-            response = Rtech1_module.rtech_streetnum(driver, dataloop, collected_data)
-            if not response["response_code"]:
-                if addResch == 'HF':
-                    response = Rtech1_module.search_HF(driver, collected_data)
+            response = Rtech1_module.rtech_streetnum(driver, dataloop, collected_data)    
+            if response["response_code"] == "00000000":
+                if addResch == 'HF': 
+                    response = Rtech1_module.search_HF(driver, dataloop, collected_data)
                 elif addResch == 'HUG':
                     response = Rtech1_module.captcha_HUG(driver, dataloop, collected_data)
-
 
         elif Search_Gubun == '2': # 도로명검색일때
             response = Rtech1_module.rtech_roadnum(driver, dataloop, collected_data)
-            if not response["response_code"]:
+            if response["response_code"] == "00000000":
                 if addResch == 'HF':
-                    response = Rtech1_module.search_HF(driver, collected_data)
+                    response = Rtech1_module.search_HF(driver, dataloop, collected_data)
                 elif addResch == 'HUG':
                     response = Rtech1_module.captcha_HUG(driver, dataloop, collected_data)
-         
+       
         common_module.screenshot_save(driver, dataloop, collected_data)
         
         return response

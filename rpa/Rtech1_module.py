@@ -8,6 +8,7 @@ from io import BytesIO
 import predict_sh
 from PIL import Image
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 
 # SSL 인증서 검증 무시 설정
 # ssl._create_default_https_context = ssl._create_unverified_context
@@ -58,6 +59,7 @@ def rtech_streetnum(driver, dataloop, kwargs):
 
         time.sleep(5)
 
+        # 1.지역검색
         try:
             # 1. 시도 선택
             select = WebDriverWait(driver, 20).until(
@@ -79,12 +81,134 @@ def rtech_streetnum(driver, dataloop, kwargs):
             )
             select_2 = Select(select_2)
             select_2.select_by_visible_text(Ridong)
+
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "주소 선택 중 타임아웃 발생."
             response["data"] = [0, 0, 0, 0]
             return response
 
+        # 2. 지역검색 클릭
+        try:
+            map_search = WebDriverWait(driver, 20).until(
+                EC.element_to_be_clickable((By.CLASS_NAME, "map_search_inputtxt2_search2"))
+            )
+            map_search.click()
+        except NoSuchElementException:
+            print("요소를 찾을 수 없습니다.")
+            pop_title = False
+        except Exception as e:
+            error = str(e).split("\n")[0] 
+            print(error)    
+
+        time.sleep(3)
+
+        # 3.지역검색 결과 단지정보에서 해당건이 있는지 필터링한다. 
+        # 여러 개의 요소가 발견되면 1개가 나올때까지 진행한다.
+        try:
+            # 여러 요소를 찾을 때는 find_elements를 사용 go_apt_info
+            apt_elements = driver.find_elements(By.XPATH, f"//a[contains(@href, 'go_apt_info') and contains(., '{Building_Name}') and .//span[contains(normalize-space(.), '{Estate_ch}')]]")
+
+            # 요소의 개수 확인
+            if len(apt_elements) > 1:
+                print(f"여러 개의 요소가 발견되었습니다. 개수: {len(apt_elements)}")
+            elif len(apt_elements) == 1:
+                print("하나의 요소가 발견되었습니다.")
+            else:
+                print("요소를 찾을 수 없습니다.")   
+
+            # 하나의 요소인 경우 1 step
+            if len(apt_elements) == 1:
+
+                try:
+                    apt_element = driver.find_element(
+                        By.XPATH, f"//a[contains(@href, 'go_apt_info') and contains(normalize-space(.), '{Building_Name}') and .//span[contains(normalize-space(.), '{Estate_ch}')]]"
+                    )                
+                    driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
+                    apt_element.click()
+                    
+                except NoSuchElementException:
+                    print("요소를 찾을 수 없습니다.")
+                    response["response_code"] = "90000000"
+                    response["response_msg"] = "요소를 찾을 수 없습니다."
+                    response["data"] = [0, 0, 0, 0]
+                    return response    
+                except Exception as e:
+                    error = str(e).split("\n")[0]
+                    response["response_code"] = "90000001"
+                    response["response_msg"] = f"요소를 찾을 수 없습니다. 중 예외 발생: {error}"
+                    response["data"] = [0, 0, 0, 0]
+                    return response
+
+                response["response_code"] = "00000000"
+                response["response_msg"] = "정상적으로 처리되었습니다.[지역검색]"
+                response["data"] = [0, 0, 0, 0]
+                return response    
+            
+            # 여러 개의 요소인 경우 필터링에 동 추가
+            if len(apt_elements) > 1:
+                # 여러 요소를 찾을 때는 find_elements를 사용 go_apt_info
+                apt_elements = driver.find_elements(
+                    By.XPATH, f"//a[contains(@href, 'go_apt_info') and contains(., '{Building_Name}') and contains(., '{Building_No1}') and .//span[contains(normalize-space(.), '{Estate_ch}')]]"
+                )
+
+                # 요소의 개수 확인
+                if len(apt_elements) > 1:
+                    print(f"여러 개의 요소가 발견되었습니다. 개수: {len(apt_elements)}")                    
+                elif len(apt_elements) == 1:
+                    print("하나의 요소가 발견되었습니다.")
+                else:
+                    print("요소를 찾을 수 없습니다.")        
+
+            # 하나의 요소인 경우 2 step
+            if len(apt_elements) == 1:
+
+                try:
+                    apt_element = driver.find_element(
+                        By.XPATH, f"//a[contains(@href, 'go_apt_info') and contains(normalize-space(.), '{Building_Name}') and .//span[contains(normalize-space(.), '{Estate_ch}')]]"
+                    )                
+                    driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
+                    apt_element.click()
+                    
+                except NoSuchElementException:
+                    print("요소를 찾을 수 없습니다.")
+                    response["response_code"] = "90000000"
+                    response["response_msg"] = "요소를 찾을 수 없습니다."
+                    response["data"] = [0, 0, 0, 0]
+                    return response    
+                except Exception as e:
+                    error = str(e).split("\n")[0]
+                    response["response_code"] = "90000001"
+                    response["response_msg"] = f"요소를 찾을 수 없습니다. 중 예외 발생: {error}"
+                    response["data"] = [0, 0, 0, 0]
+                    return response
+
+                response["response_code"] = "00000000"
+                response["response_msg"] = "정상적으로 처리되었습니다.[지역검색]"
+                response["data"] = [0, 0, 0, 0]
+                return response
+                                
+        except NoSuchElementException:
+            print("요소를 찾을 수 없습니다.")
+            response["response_code"] = "90000000"
+            response["response_msg"] = "요소를 찾을 수 없습니다."
+            response["data"] = [0, 0, 0, 0]
+            return response
+        except TimeoutException:
+            response["response_code"] = "90000000"
+            response["response_msg"] = "요소를 찾을 수 없습니다. 중 타임아웃 발생."
+            response["data"] = [0, 0, 0, 0]
+            return response
+        except Exception as e:
+            error = str(e).split("\n")[0]
+            response["response_code"] = "90000001"
+            response["response_msg"] = f"요소를 찾을 수 없습니다. 중 예외 발생: {error}"
+            response["data"] = [0, 0, 0, 0]
+            return response
+
+
+        # ================   지역검색이 정상적으로 처리되지 않으면 빠른검색 프로세스 진행한다.  ================
+        # 2.빠른검색
         try:
             # 4. 빠른검색 입력(건물이름)
             search_input = WebDriverWait(driver, 20).until(
@@ -93,11 +217,13 @@ def rtech_streetnum(driver, dataloop, kwargs):
             building_name = Building_Name
             search_address = Sido + " " + Sigungu2 + " " + Ridong
             search_input.send_keys(building_name)
+
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "검색 입력 필드를 찾을 수 없습니다."
             response["data"] = [0, 0, 0, 0]
             return response
+        
         time.sleep(3)
 
         try:
@@ -106,29 +232,33 @@ def rtech_streetnum(driver, dataloop, kwargs):
                 EC.presence_of_element_located((By.ID, "quickSearchResult"))
             )
             result_items = results_ul.find_elements(By.TAG_NAME, "li")  # 검색 결과 리스트의 각 항목
+
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "검색 결과 리스트를 찾을 수 없습니다."
             response["data"] = [0, 0, 0, 0]
-            return response            
+            return response     
+               
         time.sleep(3)
 
         try:
             # "검색 결과가 없습니다." 
             for item in result_items:
                 if "검색 결과가 없습니다." in item.text:
-                    response["response_code"] = "00000000"
+                    response["response_code"] = "90000001"
                     response["response_msg"] = "검색 결과가 없습니다. 프로그램을 종료합니다."
                     response["data"] = [0, 0, 0, 0]
                     return response
         except Exception as e:
             error = str(e).split("\n")[0]
-            response["response_code"] = "90000001"
+            response["response_code"] = "90000002"
             response["response_msg"] = f"검색 결과 처리 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
+        
         time.sleep(3)
-        # 완전 일치하는 항목 찾기
+
+        # 1.빠른검색에서 완전 일치하는 항목 찾기
         try:
             matching_item = None
             search_keywords = search_address.split() 
@@ -141,6 +271,8 @@ def rtech_streetnum(driver, dataloop, kwargs):
                     break
 
             time.sleep(5)
+
+            # 빠른검색 리스트에서 결과값이 있으면 클릭하면 팝업 더보기 띄우고 -> # 3. 이동 
             if matching_item:
                 driver.execute_script("arguments[0].scrollIntoView(true);", matching_item)
                 matching_item.click()
@@ -152,25 +284,47 @@ def rtech_streetnum(driver, dataloop, kwargs):
             
         except Exception as e:
             error = str(e).split("\n")[0]
-            response["response_code"] = "90000001"
+            response["response_code"] = "90000002"
             response["response_msg"] = f"항목 선택 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
-            return response        
+            return response
+               
         time.sleep(3)
 
+        # 팝업 타이틀 객체 찾기 오류 상태값값
+        pop_title = True
+        
+        # 3.빠른검색에서 결과 나오면 단지정보 리스트에서 일치하는건 클릭한다.
         try:
-            # 3. 해당 아파트 항목 클릭
-            building_name = WebDriverWait(driver, 20).until(
-                EC.presence_of_element_located((By.CLASS_NAME, "map_pop_infobox_tit1"))
-            )
-            time.sleep(3)
-            apt_element = WebDriverWait(driver, 20).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, f"//a[contains(@href, 'go_apt_info') and contains(., '{Estate_ch}') and contains(., '{building_name.text}')]")
-            )
-            )
-            driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
-            apt_element.click()
+
+            try:
+                # 3. 해당 아파트 항목 클릭 
+                building_name = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "map_pop_infobox_tit1"))                
+                )
+                #print("요소가 존재합니다.")
+            except NoSuchElementException:
+                #print("요소를 찾을 수 없습니다.")
+                pop_title = False                            
+            
+            # 팝업 타이틀명이 있으면 다음 단계 처리한다.
+            if pop_title:
+                time.sleep(3)
+
+                # 상단 타이틀명으로 단지정보에서 검색
+                apt_element = WebDriverWait(driver, 20).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, f"//a[contains(@href, 'go_apt_info') and contains(., '{Estate_ch}') and contains(., '{building_name.text}')]")
+                )
+                )
+                driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
+                apt_element.click()
+
+                response["response_code"] = "00000000"
+                response["response_msg"] = "정상적으로 처리되었습니다.[빠른검색]"
+                response["data"] = [0, 0, 0, 0]
+                return response
+                
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "물건지 항목 클릭 중 타임아웃 발생."
@@ -192,6 +346,9 @@ def rtech_streetnum(driver, dataloop, kwargs):
     return response
 
 
+# ===================================================================================
+# 도로명 인 경우 프로세스
+# =================================================================================== 
 def rtech_roadnum(driver, dataloop, kwargs): 
     response = {
         "response_code": None,
@@ -273,7 +430,7 @@ def rtech_roadnum(driver, dataloop, kwargs):
             # "검색 결과가 없습니다." 
             for item in result_items:
                 if "검색 결과가 없습니다." in item.text:
-                    response["response_code"] = "00000000"
+                    response["response_code"] = "90000006"
                     response["response_msg"] = "검색 결과가 없습니다. 프로그램을 종료합니다."
                     response["data"] = [0, 0, 0, 0]
                     return response
@@ -283,6 +440,7 @@ def rtech_roadnum(driver, dataloop, kwargs):
             response["response_msg"] = f"검색 결과 처리 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
+        
         time.sleep(3)
         # 완전 일치하는 항목 찾기
         matching_item = None
@@ -296,7 +454,9 @@ def rtech_roadnum(driver, dataloop, kwargs):
                 if all(keyword in item_text for keyword in search_keywords):    
                     matching_item = item
                     break
-            time.sleep(5)
+
+            # time.sleep(5)
+
             if matching_item:
                 driver.execute_script("arguments[0].scrollIntoView(true);", matching_item)
                 matching_item.click()
@@ -329,6 +489,7 @@ def rtech_roadnum(driver, dataloop, kwargs):
             driver.execute_script("arguments[0].scrollIntoView(true);", apt_element)
             time.sleep(1)
             apt_element.click()
+
         except TimeoutException:
             response["response_code"] = "90000000"
             response["response_msg"] = "물건지 항목 클릭 중 타임아웃 발생."
@@ -351,6 +512,7 @@ def rtech_roadnum(driver, dataloop, kwargs):
 
     return response
 
+# HUG 인 경우 
 def captcha_HUG(driver, dataloop, kwargs):
     response = {
         "response_code": None,
@@ -383,12 +545,11 @@ def captcha_HUG(driver, dataloop, kwargs):
         else:
             print("팝업창이 감지되지 않았습니다. 현재 화면에서 캡처를 진행합니다.")
             return None
-
+     
         try:
             time.sleep(5)
             # 8. 팝업 내 '호별 시세조회' 요소 클릭
             ho_background = WebDriverWait(driver, 20).until(
-
                 EC.presence_of_element_located((By.ID, "DongHoInfo"))
             )
             driver.execute_script("javascript:infotabChange(2);", ho_background)
@@ -421,7 +582,7 @@ def captcha_HUG(driver, dataloop, kwargs):
             response["response_msg"] = f"기준일 가져오는 중 예외 발생: {error}"
             response["data"] = [0, 0, 0, 0]
             return response
-        
+                
         # 물건지 정보가 아파트일 경우
         try:
             if Estate_Gubun == '1' or Estate_Gubun == '2':
@@ -782,7 +943,7 @@ def captcha_HUG(driver, dataloop, kwargs):
     return response
 
 
-def search_HF(driver, kwargs):
+def search_HF(driver, dataloop, kwargs):
     response = {
         "response_code": None,
         "response_msg": None,
@@ -830,7 +991,7 @@ def search_HF(driver, kwargs):
             rtech_low_value = int(low_value.replace(",", ""))
             rtech_high_value = int(high_value.replace(",", ""))
             response["response_code"] = "00000000"
-            response["response_msg"] = "성공적으로 하한평균가를 가져왔습니다."
+            response["response_msg"] = "정상적으로 처리되었습니다."
             response["data"] = [rtech_high_value, rtech_low_value, 0, 0]
             return response
         

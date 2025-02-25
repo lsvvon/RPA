@@ -11,15 +11,14 @@ def main(dataloop, collected_data):
             Search_Gubun = entry.get("Search_Gubun")
 
         if Search_Gubun == '1': # 지번검색일때
-            response = Rtech2_module.rtech_app_streetnum(driver, collected_data)
-            if not response["response_code"]:
-                response = Rtech2_module.captcha_APP(driver, collected_data)
+            response = Rtech2_module.rtech_app_streetnum(driver, dataloop, collected_data)
+            if response["response_code"] == "00000000":
+                response = Rtech2_module.captcha_APP(driver, dataloop, collected_data)
 
         elif Search_Gubun == '2': # 도로명검색일때
-            response = Rtech2_module.rtech_app_roadnum(driver, collected_data)
-            if not response["response_code"]:
-                response = Rtech2_module.captcha_APP(driver, collected_data)
-
+            response = Rtech2_module.rtech_app_roadnum(driver, dataloop, collected_data)
+            if response["response_code"] == "00000000":
+                response = Rtech2_module.captcha_APP(driver, dataloop, collected_data)
 
         common_module.screenshot_save(driver, dataloop, collected_data)
 

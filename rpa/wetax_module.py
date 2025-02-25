@@ -253,7 +253,7 @@ def wetax_officetel(driver, kwargs):
 
     except TimeoutException:
         response["response_code"] = "90000000"
-        response["response_msg"] = "건물시가표준액 찾기 중 타임아웃 발생."
+        response["response_msg"] = "검색 결과가 존재하지 않습니다.[건물시가표준액]"
         response["data"] = [0, 0, 0, 0]
         return response
     except Exception as e:

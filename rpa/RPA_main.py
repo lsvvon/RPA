@@ -29,6 +29,8 @@ chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
 chrome_options.add_argument("--no-sandbox")
 
+loopFlag = True
+
 
 def data_insert(result, i):
     print(result)
@@ -44,7 +46,7 @@ def data_insert(result, i):
         response_msg_input = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "Response_Msg" + str(i)))
         )
-        response_msg_input.send_keys(result['response_msg'])
+        response_msg_input.send_keys(result['response_msg'].replace("’", "").strip())
 
         Price_High = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "Price_High" + str(i)))
@@ -119,7 +121,7 @@ def response_insert():
 # print(end_time)
 
 # while datetime.now() < end_time:
-while True:
+while loopFlag:
     try:
         driver = common_module.initialize_driver()
         url = "https://bizssl.shinhanci.co.kr/SHSCHER/Asp/RPA/CA_RPA_Condition.asp"
@@ -258,14 +260,14 @@ while True:
             
             try:
                 if ticker in module_mapping:
-                    # if ticker == "KBLand":
+                    # if ticker == "Rtech":
                     result = module_mapping[ticker](
-                                dataloop,
-                                collected_data
-                            )                    
+                        dataloop,
+                        collected_data
+                    )                    
 
 
-                    # if ticker == 'Rtech':
+                    # if ticker == 'KBLand':
                     #     KBland_ResCode = result['response_code']
                     # elif ticker == 'Rtech':
                     #     Rtech_ResCode = result['response_code']
@@ -278,6 +280,10 @@ while True:
                     file_attach(dataloop, collected_data, i)
 
                     print(f"{ticker} 실행 완료.")
+
+                    # $$$ 임시 종료로 사용
+                    # if i == 2:
+                    #     break 
                     
             except Exception as e:
                 print(f"{ticker} 실행 중 오류 발생fdfd: {e}")
@@ -313,6 +319,8 @@ while True:
         # 드라이버 종료 후 다시 실행
         driver.quit()
         time.sleep(5)
+
+        # loopFlag = False
 
     except Exception as e:
         print("오류 발생:", e)
