@@ -88,12 +88,15 @@ def KBland_streetnum(driver, dataloop, kwargs):
             return response
 
         def parse_cost_value(text):
-            match = re.match(r"(\d+)억\s*([\d,]*)", text)
+            text = text.replace(",", "")  # 숫자에 있는 콤마 제거
+            match = re.match(r"(?:(\d+)억)?\s*(?:(\d+)만)?", text)
             if match:
-                billion = int(match.group(1)) * 10**8
-                million = int(match.group(2).replace(",", "")) * 10**4 if match.group(2) else 0
+                billion = int(match.group(1)) * 10**8 if match.group(1) else 0
+                million = int(match.group(2)) * 10**4 if match.group(2) else 0
                 return billion + million
+            
             return 0
+
 
         # 상세시세에서 면적 클릭히고 해당하는 대상 선택한다. 시세를 가져온다.   
         def proceed_with_area_selection(driver, Build_Area, response):
@@ -168,10 +171,15 @@ def KBland_streetnum(driver, dataloop, kwargs):
                         common_value_text = common_value_element.text.strip()     
 
                         if "시세없음" in common_value_text:  # 시세없음인 경우 0 반환
-                            kb_common_value = '시세없음'
+                            kb_common_value = 0
                             kb_low_value = 0
                             date_text = 0
-                            print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
+
+                            response["response_code"] = "90000008"
+                            response["response_msg"] = "검색결과 시세없음."
+                            response["data"] = [kb_common_value, kb_low_value, 0, date_text]            
+                            return response
+                            # print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
                         else:
                             kb_common_value = parse_cost_value(common_value_text)                        
                             # 하위평균가 가져오기
@@ -229,10 +237,15 @@ def KBland_streetnum(driver, dataloop, kwargs):
                     common_value_text = common_value_element.text.strip()       
 
                     if "시세없음" in common_value_text:  # 시세없음인 경우 0 반환
-                        kb_common_value = '시세없음'
+                        kb_common_value = 0
                         kb_low_value = 0
                         date_text = 0
-                        print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
+
+                        response["response_code"] = "90000008"
+                        response["response_msg"] = "검색결과 시세없음."
+                        response["data"] = [kb_common_value, kb_low_value, 0, date_text]            
+                        return response
+                        # print("일반가 값이 '시세없음'이므로 일반가와 하위평균가를 0으로 설정합니다.")
                     else:
                         kb_common_value = parse_cost_value(common_value_text)
                         # 하위평균가 가져오기
@@ -454,11 +467,14 @@ def KBland_roadnum(driver, dataloop, kwargs):
             return response       
 
         def parse_cost_value(text):
-            match = re.match(r"(\d+)억\s*([\d,]*)", text)
+            text = text.replace(",", "")  # 숫자에 있는 콤마 제거
+            match = re.match(r"(?:(\d+)억)?\s*(?:(\d+)만)?", text)
+            
             if match:
-                billion = int(match.group(1)) * 10**8
-                million = int(match.group(2).replace(",", "")) * 10**4 if match.group(2) else 0
+                billion = int(match.group(1)) * 10**8 if match.group(1) else 0
+                million = int(match.group(2)) * 10**4 if match.group(2) else 0
                 return billion + million
+            
             return 0
 
         def proceed_with_area_selection(driver):

@@ -9,8 +9,8 @@ def initialize_driver():
     options = Options()
     options.add_argument("--start-maximized")
     options.add_experimental_option("detach", True)
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('excludeSwitches', ['disable-popup-blocking'])
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
     return webdriver.Chrome(options=options)
 
 def screenshot_save(driver, dataloop, kwargs):
@@ -33,7 +33,7 @@ def screenshot_save(driver, dataloop, kwargs):
 
         # 파일 경로 설정
         next_seq = "70" + Rank
-        screenshot_name = f"{Lease_Inv_Mng_No}_{next_seq}.png"
+        screenshot_name = f"{Lease_Inv_Mng_No}_{next_seq}.jpg"
         print("screenshot_name : ", screenshot_name) 
         screenshot_path = os.path.join(folder_path, screenshot_name)
 

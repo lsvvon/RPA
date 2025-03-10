@@ -623,9 +623,9 @@ def captcha_HUG(driver, dataloop, kwargs):
                     if not os.path.exists(save_path):
                         os.makedirs(save_path)
 
-                    page_width = driver.execute_script('return document.body.parentNode.scrollWidth')
-                    page_height = driver.execute_script('return document.body.parentNode.scrollHeight')
-                    driver.set_window_size(page_width, page_height)
+                    # page_width = driver.execute_script('return document.body.parentNode.scrollWidth')
+                    # page_height = driver.execute_script('return document.body.parentNode.scrollHeight')
+                    # driver.set_window_size(page_width, page_height)
                     png = driver.get_screenshot_as_png()
                     
                     captcha_img = WebDriverWait(driver, 20).until(
@@ -785,9 +785,9 @@ def captcha_HUG(driver, dataloop, kwargs):
                     if not os.path.exists(save_path):
                         os.makedirs(save_path)
 
-                    page_width = driver.execute_script('return document.body.parentNode.scrollWidth')
-                    page_height = driver.execute_script('return document.body.parentNode.scrollHeight')
-                    driver.set_window_size(page_width, page_height)
+                    # page_width = driver.execute_script('return document.body.parentNode.scrollWidth')
+                    # page_height = driver.execute_script('return document.body.parentNode.scrollHeight')
+                    # driver.set_window_size(page_width, page_height)
                     png = driver.get_screenshot_as_png()
                     
                     captcha_img = WebDriverWait(driver, 20).until(

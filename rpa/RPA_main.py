@@ -81,7 +81,7 @@ def file_attach(dataloop, collected_data, i):
 
     # 파일 경로 설정
     next_seq = "70" + Rank
-    file_name = f"{Lease_Inv_Mng_No}_{next_seq}.png"    
+    file_name = f"{Lease_Inv_Mng_No}_{next_seq}.jpg"    
     file_path = os.path.join(folder_path, file_name)
 
     if i == 1:
@@ -122,12 +122,48 @@ def response_insert():
 
 # while datetime.now() < end_time:
 while loopFlag:
+    now = datetime.now()
+    current_hour = now.hour
+    current_minute = now.minute
+    # print(f"현재 시간: {current_hour}:{current_minute}")
+    # 8시부터 22시까지만 try 문 실행
+    if not (8 <= current_hour <= 22):
+        time.sleep(15)
+        continue
     try:
         driver = common_module.initialize_driver()
-        url = "https://bizssl.shinhanci.co.kr/SHSCHER/Asp/RPA/CA_RPA_Condition.asp"
+        #url = "https://bizssl.shinhanci.co.kr/SHSCHER/Asp/RPA/CA_RPA_Condition.asp"
+        url = "https://bizssl.shinhanci.co.kr/SHSCHER/Asp/RPA/CA_RPA3.asp"
         driver.get(url)
         #print("RPA_main.driver: ", driver)
-        time.sleep(5)
+        time.sleep(2)
+                
+        # 조회 버튼 클릭
+        try:            
+            # key value
+            AppKey_element = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.ID, "AppKey"))                
+            )
+            driver.execute_script("arguments[0].value = arguments[1];", AppKey_element, AppKey)
+
+            AppSecretKey_element = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.ID, "AppSecretKey"))
+            )
+            driver.execute_script("arguments[0].value = arguments[1];", AppSecretKey_element, AppSecretKey)
+
+            submit_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.ID, "btnSearch"))
+            )
+            submit_button.click()
+            print("RPA 조회 완료!")
+
+        except Exception as e:
+            print("RPA 조회 버튼 클릭 실패:", e)
+            # 드라이버 종료 후 다시 실행
+            driver.quit()
+            continue
+
+        time.sleep(3)
 
         # 수집할 요소 정의
         elements_to_find = [
@@ -260,11 +296,11 @@ while loopFlag:
             
             try:
                 if ticker in module_mapping:
-                    # if ticker == "Rtech":
-                    result = module_mapping[ticker](
-                        dataloop,
-                        collected_data
-                    )                    
+                    if ticker == "KBLand":
+                        result = module_mapping[ticker](
+                            dataloop,
+                            collected_data
+                        )                    
 
 
                     # if ticker == 'KBLand':
@@ -282,8 +318,8 @@ while loopFlag:
                     print(f"{ticker} 실행 완료.")
 
                     # $$$ 임시 종료로 사용
-                    # if i == 2:
-                    #     break 
+                    if ticker == "KBLand":
+                        break 
                     
             except Exception as e:
                 print(f"{ticker} 실행 중 오류 발생fdfd: {e}")
@@ -292,29 +328,42 @@ while loopFlag:
 
             i += 1
 
-        # 등록 버튼 클릭
-        try:
-            # response_code, response_msg 값 넣기
-            Response_Code1 = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.ID, "Response_Code1"))
-            )
-            Response_Msg1 = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.ID, "Response_Msg1"))
-            )
-            time.sleep(3)
-            # rpa 성공 여부 판단
-            Response_Code1.send_keys("00000000")
-            Response_Msg1.send_keys("RPA 정상적으로 처리되었습니다.")
-            print("✅ RPA 실행 성공!")
+        # 등록 버튼 클릭 : 조회값이 있는 경우
+        if len(data) > 0:
+            try:
+                # response_code, response_msg 값 넣기
+                Response_Code1 = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "Response_Code1"))
+                )
+                Response_Msg1 = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "Response_Msg1"))
+                )
+                # key value
+                AppKey_element = WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located((By.ID, "AppKey"))                
+                )
+                driver.execute_script("arguments[0].value = arguments[1];", AppKey_element, AppKey)
 
-            submit_button = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.ID, "btnInsert"))
-            )
-            submit_button.click()
-            print("RPA 등록 완료!")
-            time.sleep(3)
-        except Exception as e:
-            print("RPA 등록 버튼 클릭 실패:", e)
+                AppSecretKey_element = WebDriverWait(driver, 20).until(
+                    EC.presence_of_element_located((By.ID, "AppSecretKey"))
+                )
+                driver.execute_script("arguments[0].value = arguments[1];", AppSecretKey_element, AppSecretKey)
+
+                # rpa 성공 여부 판단
+                Response_Code1.send_keys("00000000")
+                Response_Msg1.send_keys("RPA 정상적으로 처리되었습니다.")
+                print("✅ RPA 실행 성공!")
+
+                submit_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "btnInsert"))
+                )
+                submit_button.click()
+                print("RPA 등록 완료!")
+                time.sleep(3)
+            except Exception as e:
+                print("RPA 등록 버튼 클릭 실패:", e)
+
+        time.sleep(3)    
 
         # 드라이버 종료 후 다시 실행
         driver.quit()

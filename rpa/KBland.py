@@ -1,6 +1,6 @@
 import KBland_module
 import common_module
-
+from selenium.webdriver.common.by import By
 
 def main(dataloop, collected_data):
     driver = None
@@ -12,9 +12,18 @@ def main(dataloop, collected_data):
         
         if Search_Gubun == '1': # 지번검색일때
             response = KBland_module.KBland_streetnum(driver, dataloop, collected_data)
+            if response["response_code"] == '00000000':
+                # 특정 요소를 페이지 상단으로 스크롤 이동
+                element = driver.find_element(By.XPATH, "//*[@class='saleBar']")
+                driver.execudkte_script("arguments[0].scrollIntoView(true);", element)
+
         elif Search_Gubun == '2':   # 도로명검색일때
             response = KBland_module.KBland_roadnum(driver, dataloop, collected_data)
-            
+            if response["response_code"] == '00000000':
+                # 특정 요소를 페이지 상단으로 스크롤 이동
+                element = driver.find_element(By.XPATH, "//*[@class='saleBar']")
+                driver.execute_script("arguments[0].scrollIntoView(true);", element)
+        
         common_module.screenshot_save(driver, dataloop, collected_data)
 
         return response

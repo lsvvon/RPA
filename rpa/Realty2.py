@@ -1,6 +1,9 @@
 import realtyprice_module
 from selenium.common.exceptions import TimeoutException
 import common_module
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 def main(dataloop, collected_data):
@@ -15,7 +18,11 @@ def main(dataloop, collected_data):
         
         elif Search_Gubun == '2':
             response = realtyprice_module.realtyprice_individual_roadnum(driver, collected_data)
-            
+        
+        # 특정 요소를 페이지 상단으로 스크롤 이동
+        element = driver.find_element(By.XPATH, "//*[@class='searchform']")
+        driver.execute_script("arguments[0].scrollIntoView(true);", element)
+
         common_module.screenshot_save(driver, dataloop, collected_data)
         return response
     
