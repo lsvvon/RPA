@@ -124,13 +124,57 @@ def search_auction(driver, kwargs):
             response["data"] = [0, 0, 0, 0]
             return response 
         
+        # 경매조건 값 확인
         try:
-            # "기일내역" 탭 클릭
-            tab_element = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.ID, "mf_wfm_mainFrame_tac_srchRsltDvs_tab_tabs2_tabHTML"))
+            # 법원명(span) 가져오기
+            court_span = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.ID, "mf_wfm_mainFrame_spn_cortOfcNm"))
             )
-            driver.execute_script("arguments[0].click();", tab_element)
-            time.sleep(2)
+            court_text = court_span.text.strip()
+            # 사건번호(span) 가져오기
+            case_span = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.ID, "mf_wfm_mainFrame_spn_userCsNo"))
+            )
+            case_text = case_span.text.strip()
+            # 두 값 비교
+            if court_text == Court and case_text == CaseYear + ' 타경' + CaseNo:
+                print("두 값이 모두 일치함. 다음 단계로 진행합니다.")
+            else:
+                print("일치하지 않음. 넘어가지 않음.")
+                response["response_code"] = "90000003"
+                response["response_msg"] = f"사건번호 일치 실패"
+                response["data"] = [0, 0, 0, 0]
+                return response
+            
+        except Exception as e:
+            print("오류 발생:", e)
+                
+        try:
+            status_span = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.ID, "mf_wfm_mainFrame_spn_csBasDtsUltmtRslt"))
+            )
+            status_text = status_span.text.strip()
+
+            # 종국결과가 "미종국"일 경우 기일내역 탭 클릭
+            if status_text == "미종국":
+                # "기일내역" 탭 클릭
+                tab_element = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.ID, "mf_wfm_mainFrame_tac_srchRsltDvs_tab_tabs2_tabHTML"))
+                )
+                driver.execute_script("arguments[0].click();", tab_element)
+                time.sleep(2)
+            
+            # 종국결과가 "종국"이면 종국일자 값 가져오기
+            elif status_text == "종국":
+                end_date_span = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.ID, "mf_wfm_mainFrame_spn_csBasDtsUltmtYmd"))
+                )
+                end_date = end_date_span.text.strip()
+                response["response_code"] = "00000000"
+                response["response_msg"] = f"종국결과가 종국이므로 종국일자 값 가져옴"
+                response["data"] = end_date
+                return 
+
 
         except Exception as e:
             response["response_code"] = "90000003"
@@ -140,13 +184,6 @@ def search_auction(driver, kwargs):
 
         
         try:
-            # '기일내역' 탭 클릭
-            tab_link = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.ID, "mf_wfm_mainFrame_tac_srchRsltDvs_tab_tabs2_tabHTML"))
-            )
-            tab_link.click()
-            time.sleep(2)
-
             # 기일내역 테이블 행 전체 로드
             rows = WebDriverWait(driver, 10).until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "tr.grid_body_row"))
@@ -156,13 +193,21 @@ def search_auction(driver, kwargs):
 
             for row in rows:
                 tds = row.find_elements(By.TAG_NAME, "td")
+                
                 if len(tds) >= 7:
-                    dxdy_time = tds[2].text.strip()        # 3열
-                    auctn_type = tds[3].text.strip()       # 4열
-                    final_price = tds[5].text.strip()      # 6열
-                    progress_status = tds[6].text.strip()  # 7열
-
-                    result_data.append([dxdy_time, auctn_type, final_price, progress_status])
+                    기일일시 = tds[2].text.strip()
+                    기일종류 = tds[3].text.strip()
+                    기일장소 = tds[4].text.strip()
+                    최저매각가격 = tds[5].text.strip()
+                    기일결과 = tds[6].text.strip()
+                    
+                    result_data.append({
+                        "기일일시": 기일일시,
+                        "기일종류": 기일종류,
+                        "기일장소": 기일장소,
+                        "최저매각가격": 최저매각가격,
+                        "기일결과": 기일결과
+                    })
 
             if result_data:
                 response["response_code"] = "00000000"
@@ -170,6 +215,7 @@ def search_auction(driver, kwargs):
                 response["data"] = result_data
             else:
                 raise Exception("데이터를 가진 유효한 row가 없습니다.")
+            
         except NoSuchElementException as e:
             error = str(e).split(";")[0]
             error = str(error).split("\n")[0]
