@@ -28,7 +28,8 @@ def data_insert(result, i):
     print(result)
     if i == 1:
         i = ''
-
+    
+    # 결과값 화면에 바인딩
     if result:
         response_code_input = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "Response_Code" + str(i)))
@@ -63,29 +64,6 @@ def data_insert(result, i):
     else:
         print("main data insert 결과를 사용할 수 없습니다.")
 
-# 첨부 파일 처리
-def file_attach(dataloop, collected_data, i):    
-    folder_path = r"C:\python\RPA\rpa\capImg"  # capImg 폴더의 절대 경로
-    Lease_Inv_Mng_No = collected_data.get('Lease_Inv_Mng_No1')
-       
-    for entry in dataloop:
-        Rank = entry.get("Rank") 
-
-    # 파일 경로 설정
-    next_seq = "70" + Rank
-    file_name = f"{Lease_Inv_Mng_No}_{next_seq}.jpg"    
-    file_path = os.path.join(folder_path, file_name)
-
-    if i == 1:
-        i = ''
-    
-    # print("file_path:", file_path, i)
-
-    # 파일 첨부
-    txtFile_capImg = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "txtFile" + str(i)))
-    )
-    txtFile_capImg.send_keys(file_path)
 
 def response_insert():
     Response_Code1 = WebDriverWait(driver, 10).until(
@@ -269,8 +247,6 @@ while loopFlag:
 
                     # 화면값 세팅값    
                     data_insert(result, i)
-                    # 첨부 파일 처리
-                    file_attach(dataloop, collected_data, i)
 
                     ticker_end_time = datetime.now()                    
 

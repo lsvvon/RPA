@@ -126,28 +126,31 @@ def search_auction(driver, kwargs):
         
         # 경매조건 값 확인
         try:
-            # 법원명(span) 가져오기
+            # 법원명 가져오기
             court_span = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.ID, "mf_wfm_mainFrame_spn_cortOfcNm"))
             )
             court_text = court_span.text.strip()
-            # 사건번호(span) 가져오기
+            # 사건번호 가져오기
             case_span = WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.ID, "mf_wfm_mainFrame_spn_userCsNo"))
             )
             case_text = case_span.text.strip()
             # 두 값 비교
-            if court_text == Court and case_text == CaseYear + ' 타경' + CaseNo:
+            if court_text == Court and case_text == CaseYear + '타경' + CaseNo:
                 print("두 값이 모두 일치함. 다음 단계로 진행합니다.")
             else:
                 print("일치하지 않음. 넘어가지 않음.")
                 response["response_code"] = "90000003"
-                response["response_msg"] = f"사건번호 일치 실패"
+                response["response_msg"] = f"법원명, 사건번호 일치 실패. "
                 response["data"] = [0, 0, 0, 0]
                 return response
             
         except Exception as e:
-            print("오류 발생:", e)
+            response["response_code"] = "90000003"
+            response["response_msg"] = f"법원명, 사건번호 조회 실패: {str(e).splitlines()[0]}"
+            response["data"] = [0, 0, 0, 0]
+            return response
                 
         try:
             status_span = WebDriverWait(driver, 10).until(
@@ -220,12 +223,12 @@ def search_auction(driver, kwargs):
             error = str(e).split(";")[0]
             error = str(error).split("\n")[0]
             response["response_code"] = "90000002"
-            response["response_msg"] = f"건물시가표준액 요소 찾을 수 없습니다. {error}"
+            response["response_msg"] = f"기일내역 요소 찾을 수 없습니다. {error}"
             response["data"] = [0, 0, 0, 0]
             return response
         except TimeoutException as e:
             response["response_code"] = "90000000"
-            response["response_msg"] = "검색 결과가 존재하지 않습니다.[건물시가표준액]"
+            response["response_msg"] = "검색 결과가 존재하지 않습니다.[기일내역]"
             response["data"] = [0, 0, 0, 0]
             return response 
     
